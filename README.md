@@ -20,11 +20,11 @@ Deactivation changes `coach_clients.status` to `inactive`; it does not delete tr
 
 V3.3.1 adds inline resend progress/success/error feedback beside each pending client.
 
-## V3.3.3
+## V3.3.4
 Pending clients now use a password recovery/setup email for **Resend setup link**, rather than trying to invite an Auth user a second time. The PWA handles the Supabase `PASSWORD_RECOVERY` event and lets the client choose a password before opening the app.
 
-Deploy the included `supabase/functions/invite-client/index.ts` over the existing `invite-client` Edge Function when deploying V3.3.3.
+Deploy the included `supabase/functions/invite-client/index.ts` over the existing `invite-client` Edge Function when deploying V3.3.4.
 
 
-## V3.3.3
+## V3.3.4
 Recovery/setup links are detected from the URL before normal client boot, so an authenticated recovery session is forced through Finish account setup and password creation before the client app opens.
