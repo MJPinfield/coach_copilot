@@ -1,6 +1,6 @@
-# Coach Copilot V3.4 — coaching workflow
+# Coach Copilot V3.4.1 — coaching workflow
 
-V3.4 is built from the known-good V3.3.5 baseline. The V3.3.5 onboarding, authentication, client activation, programme delivery, workout completion and history sync flow is retained.
+V3.4.1 is a targeted patch to V3.4, which was built from the known-good V3.3.5 baseline. The V3.3.5 onboarding, authentication, client activation, programme delivery, workout completion and history sync flow is retained.
 
 ## V3.4 changes
 
@@ -46,3 +46,11 @@ Multiple sessions:
     RDL 3x8 @80kg
 
 Rep ranges currently use the lower number as the structured rep target and preserve the full range in coach notes (for example `8-10` becomes target reps `8` plus note `Target rep range 8–10`). This avoids a database schema change in V3.4.
+
+
+## V3.4.1 patch
+
+- Quick Build now generates UUIDs locally for programmes, weeks, sessions, exercises and prescribed sets.
+- Quick Build no longer chains `.select('id').single()` onto newly inserted sessions/exercises, avoiding the RLS failure seen when the new row was immediately returned through the SELECT policy.
+- Failed Quick Build saves now perform a best-effort child-to-parent cleanup of rows created by that attempt.
+- No Supabase policy, SQL, or Edge Function changes are required for this patch.

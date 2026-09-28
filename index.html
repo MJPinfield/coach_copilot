@@ -1,7 +1,7 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#111827"><link rel="manifest" href="./manifest.webmanifest"><title>Coach Copilot V3.4</title><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#111827"><link rel="manifest" href="./manifest.webmanifest"><title>Coach Copilot V3.4.1</title><style>
 :root{--bg:#f3f4f6;--card:#fff;--text:#111827;--muted:#6b7280;--border:#d1d5db}*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}.app{max-width:900px;margin:auto;padding:12px}.top,.row{display:flex;gap:10px;align-items:center}.top,.spread{justify-content:space-between}.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px;margin:12px 0}button,input,select,textarea{font:inherit;border:1px solid var(--border);border-radius:9px;padding:9px;background:#fff}button{cursor:pointer}.primary,.active{background:#111827;color:#fff}.danger{color:#b91c1c}.tabs{display:flex;gap:6px;overflow:auto}.view{display:none}.view.activeView{display:block}.muted{color:var(--muted)}.hidden{display:none!important}label{display:block;margin:9px 0}label input,label textarea,label select{display:block;width:100%;margin-top:4px}.exercise{border:1px solid var(--border);border-radius:12px;padding:10px;margin:10px 0}.setrow{display:grid;grid-template-columns:40px 1fr 1fr 1fr 38px;gap:5px;align-items:center;margin:5px 0}.setrow input{width:100%;min-width:0}.header{font-size:12px;color:var(--muted)}.history{border-top:1px solid #e5e7eb;padding:10px 0}.badge{display:inline-block;padding:3px 7px;border:1px solid #111827;border-radius:999px;font-size:12px}.err{color:#b91c1c}h1,h2,h3{margin:4px 0}.quickbuild{border:2px solid #111827}.quickbuild textarea{min-height:210px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.45}.quickHelp{font-size:13px;line-height:1.45}.draftSession{border:1px solid var(--border);border-radius:12px;padding:10px;margin:10px 0}.draftExercise{border-left:3px solid #d1d5db;padding:8px 0 8px 10px;margin:8px 0}.draftSet{display:grid;grid-template-columns:40px 1fr 1fr 1fr;gap:6px;align-items:center;margin:5px 0}.draftSet input{width:100%;min-width:0}.summaryGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.metric{border:1px solid #e5e7eb;border-radius:10px;padding:10px}.metric b{display:block;font-size:18px}.good{color:#166534}.warn{color:#92400e}.tiny{font-size:12px}.reviewFlag{font-size:12px;color:#92400e;margin-top:4px}@media(min-width:650px){.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.summaryGrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 </style></head><body><div class="app">
-<div class="top"><div><h1>Coach Copilot</h1><div class="muted">V3.4 coaching workflow</div></div><div><span id="who" class="muted"></span> <button id="signout" class="hidden">Sign out</button></div></div>
+<div class="top"><div><h1>Coach Copilot</h1><div class="muted">V3.4.1 coaching workflow</div></div><div><span id="who" class="muted"></span> <button id="signout" class="hidden">Sign out</button></div></div>
 <div id="auth" class="card"><h2>Sign in</h2><label>Email<input id="email" type="email"></label><label>Password<input id="password" type="password"></label><button id="signin" class="primary">Sign in</button><div id="authmsg" class="muted"></div></div><div id="passwordSetup" class="card hidden"><h2>Finish account setup</h2><div class="muted">Choose the password you will use to sign in to Coach Copilot.</div><label>New password<input id="newPassword" type="password" autocomplete="new-password" minlength="8"></label><label>Confirm password<input id="confirmPassword" type="password" autocomplete="new-password" minlength="8"></label><button id="savePassword" class="primary">Save password</button><div id="passwordSetupStatus" class="muted"></div></div>
 <div id="main" class="hidden"><div id="tabs" class="tabs card"><button class="tab active" data-v="clients">Clients</button><button class="tab" data-v="programme">Programme</button><button class="tab" data-v="workout">Workout</button><button class="tab" data-v="history">History</button></div>
 <section id="clients" class="view activeView"><div class="card">
@@ -114,8 +114,56 @@ function renderQuickDraft(){let box=$('quickBuildPreview');if(!quickDraft){box.c
   if(quickDraft.warnings.length){let w=document.createElement('div');w.className='reviewFlag';w.textContent='Check: '+quickDraft.warnings.join(' · ');host.appendChild(w)}
   $('saveQuickNew').onclick=()=>saveQuickDraft('new');$('saveQuickCurrent').onclick=()=>saveQuickDraft('current');$('cancelQuickDraft').onclick=()=>{quickDraft=null;renderQuickDraft();$('quickBuildStatus').textContent='Preview cancelled. Nothing was saved.'};
 }
-async function saveDraftSession(weekId,sess,position){let sr=await sb.from('sessions').insert({week_id:weekId,name:sess.name||('Session '+position),position}).select('id').single();if(sr.error)throw sr.error;for(let i=0;i<sess.exercises.length;i++){let ex=sess.exercises[i],er=await sb.from('session_exercises').insert({session_id:sr.data.id,exercise_name:ex.name||'Exercise',position:i+1,coach_notes:ex.notes||null}).select('id').single();if(er.error)throw er.error;let rows=ex.sets.map((st,j)=>({session_exercise_id:er.data.id,set_number:j+1,target_load_kg:st.target_load_kg??null,target_reps:st.target_reps??null,target_rir:st.target_rir??null}));if(rows.length){let rr=await sb.from('prescribed_sets').insert(rows);if(rr.error)throw rr.error}}return sr.data.id}
-async function saveQuickDraft(mode){if(profile.role!=='coach'||!selectedClient||!quickDraft?.sessions.length)return;let btn=mode==='new'?$('saveQuickNew'):$('saveQuickCurrent');btn.disabled=true;$('quickBuildStatus').textContent='Saving structured programme…';try{let weekId,programmeId;if(mode==='new'){let pr=await sb.from('programmes').insert({coach_id:profile.id,client_id:selectedClient.id,name:quickDraft.programmeName||'Quick Programme',goal:'',status:'active'}).select('id').single();if(pr.error)throw pr.error;programmeId=pr.data.id;let wr=await sb.from('programme_weeks').insert({programme_id:programmeId,week_number:1,name:quickDraft.weekName||'Week 1'}).select('id').single();if(wr.error)throw wr.error;weekId=wr.data.id;for(let i=0;i<quickDraft.sessions.length;i++)await saveDraftSession(weekId,quickDraft.sessions[i],i+1);sel.p=programmeId;sel.w=weekId;sel.s=null}else{let {w}=cur();if(!w)throw new Error('Create or select a programme/week first.');weekId=w.id;let base=w.sessions.length;for(let i=0;i<quickDraft.sessions.length;i++)await saveDraftSession(weekId,quickDraft.sessions[i],base+i+1)}quickDraft=null;$('quickBuildText').value='';renderQuickDraft();$('quickBuildStatus').textContent='Programme created. Review the structured version below, then it is ready for the client.';await loadTree(selectedClient.id)}catch(e){err(e);$('quickBuildStatus').textContent='Could not save: '+(e.message||String(e));btn.disabled=false}}
+// V3.4.1: Quick Build supplies UUIDs itself and does not use INSERT ... RETURNING/SELECT on newly-created rows.
+// This keeps creation inside the existing coach INSERT policies and avoids the sessions SELECT-policy visibility problem.
+async function saveDraftSession(weekId,sess,position,created){
+  const sessionId=crypto.randomUUID();
+  let sr=await sb.from('sessions').insert({id:sessionId,week_id:weekId,name:sess.name||('Session '+position),position});
+  if(sr.error)throw sr.error;
+  created.sessions.push(sessionId);
+  for(let i=0;i<sess.exercises.length;i++){
+    let ex=sess.exercises[i],exerciseId=crypto.randomUUID();
+    let er=await sb.from('session_exercises').insert({id:exerciseId,session_id:sessionId,exercise_name:ex.name||'Exercise',position:i+1,coach_notes:ex.notes||null});
+    if(er.error)throw er.error;
+    created.exercises.push(exerciseId);
+    let rows=ex.sets.map((st,j)=>{let id=crypto.randomUUID();created.sets.push(id);return {id,session_exercise_id:exerciseId,set_number:j+1,target_load_kg:st.target_load_kg??null,target_reps:st.target_reps??null,target_rir:st.target_rir??null}});
+    if(rows.length){let rr=await sb.from('prescribed_sets').insert(rows);if(rr.error)throw rr.error}
+  }
+  return sessionId;
+}
+async function cleanupQuickBuild(created){
+  // Best-effort rollback for a multi-step browser save. Delete in child-to-parent order.
+  if(created.sets.length)await sb.from('prescribed_sets').delete().in('id',created.sets);
+  if(created.exercises.length)await sb.from('session_exercises').delete().in('id',created.exercises);
+  if(created.sessions.length)await sb.from('sessions').delete().in('id',created.sessions);
+  if(created.weeks.length)await sb.from('programme_weeks').delete().in('id',created.weeks);
+  if(created.programmes.length)await sb.from('programmes').delete().in('id',created.programmes);
+}
+async function saveQuickDraft(mode){
+  if(profile.role!=='coach'||!selectedClient||!quickDraft?.sessions.length)return;
+  let btn=mode==='new'?$('saveQuickNew'):$('saveQuickCurrent');btn.disabled=true;$('quickBuildStatus').textContent='Saving structured programme…';
+  const created={programmes:[],weeks:[],sessions:[],exercises:[],sets:[]};
+  try{
+    let weekId,programmeId;
+    if(mode==='new'){
+      programmeId=crypto.randomUUID();
+      let pr=await sb.from('programmes').insert({id:programmeId,coach_id:profile.id,client_id:selectedClient.id,name:quickDraft.programmeName||'Quick Programme',goal:'',status:'active'});
+      if(pr.error)throw pr.error;created.programmes.push(programmeId);
+      weekId=crypto.randomUUID();
+      let wr=await sb.from('programme_weeks').insert({id:weekId,programme_id:programmeId,week_number:1,name:quickDraft.weekName||'Week 1'});
+      if(wr.error)throw wr.error;created.weeks.push(weekId);
+      for(let i=0;i<quickDraft.sessions.length;i++)await saveDraftSession(weekId,quickDraft.sessions[i],i+1,created);
+      sel.p=programmeId;sel.w=weekId;sel.s=null;
+    }else{
+      let {w}=cur();if(!w)throw new Error('Create or select a programme/week first.');weekId=w.id;let base=w.sessions.length;
+      for(let i=0;i<quickDraft.sessions.length;i++)await saveDraftSession(weekId,quickDraft.sessions[i],base+i+1,created);
+    }
+    quickDraft=null;$('quickBuildText').value='';renderQuickDraft();$('quickBuildStatus').textContent='Programme created. Review the structured version below, then it is ready for the client.';await loadTree(selectedClient.id);
+  }catch(e){
+    await cleanupQuickBuild(created);
+    err(e);$('quickBuildStatus').textContent='Could not save: '+(e.message||String(e))+' Any rows created by this attempt were rolled back.';btn.disabled=false;
+  }
+}
 $('previewQuickBuild').onclick=()=>{if(profile.role!=='coach')return;quickDraft=parseQuickBuild($('quickBuildText').value);renderQuickDraft();let n=quickDraft.sessions.reduce((a,s)=>a+s.exercises.length,0);$('quickBuildStatus').textContent=quickDraft.sessions.length?n+' exercises recognised across '+quickDraft.sessions.length+' session'+(quickDraft.sessions.length===1?'':'s')+'. Review below before saving.':'No exercises recognised yet.'};
 $('clearQuickBuild').onclick=()=>{$('quickBuildText').value='';quickDraft=null;renderQuickDraft();$('quickBuildStatus').textContent=''};
 $('loadExample').onclick=()=>{$('quickBuildText').value='Upper A\n\nBench press 4x5 @70kg 2 RIR\nPull ups 3x8\nIncline DB press 3x8-10 @26kg\nChest supported row 3x10 @70kg\nLateral raise 3x12 @10kg\n\nBench press: 3 min rest, pause first rep'};
