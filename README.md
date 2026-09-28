@@ -1,4 +1,4 @@
-# Coach Copilot V3.3 — client onboarding
+# Coach Copilot V3.3.1 — client onboarding
 
 This build adds coach-side client onboarding without exposing Supabase admin credentials in the PWA.
 
@@ -16,3 +16,6 @@ The Edge Function uses Supabase's server-side `SUPABASE_SERVICE_ROLE_KEY` enviro
 Coach clicks + Add Client → name/email → Edge Function sends Supabase invitation and creates a pending relationship → client accepts invite → relationship becomes active → client appears as active in Coach Copilot.
 
 Deactivation changes `coach_clients.status` to `inactive`; it does not delete training history.
+
+
+V3.3.1 adds inline resend progress/success/error feedback beside each pending client.
