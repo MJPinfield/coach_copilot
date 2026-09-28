@@ -1,36 +1,48 @@
-# Coach Copilot V3.3.1 — client onboarding
+# Coach Copilot V3.4 — coaching workflow
 
-This build adds coach-side client onboarding without exposing Supabase admin credentials in the PWA.
+V3.4 is built from the known-good V3.3.5 baseline. The V3.3.5 onboarding, authentication, client activation, programme delivery, workout completion and history sync flow is retained.
 
-## Static app
-Upload the normal root files to GitHub Pages as before.
+## V3.4 changes
 
-## One-time Supabase setup
-V3.3 also contains:
-- `supabase/functions/invite-client/index.ts` — privileged invitation function. Deploy this as a Supabase Edge Function named `invite-client`.
-- `supabase/v3.3-activate-invited-client.sql` — run once in SQL Editor.
+- **Coach-only Quick Build:** write/paste a programme in normal PT shorthand, preview the parsed structure, edit it, then create a new programme or add sessions to the current week.
+- Quick Build is deterministic and local until approval: **nothing is written to Supabase when you press Build preview.**
+- Supports common shorthand including `4x5 @70kg`, `70kg 4x5`, `3x8-10 @26kg`, RIR and coaching notes.
+- Multiple sessions can be entered with `Session: Upper A`, `Session: Lower A`, etc.
+- **Coach snapshot:** current programme, weekly completion, total completed sessions, latest sleep and last workout.
+- **Client workout shortcut:** Complete prescribed fills and marks all prescribed sets for an exercise; the client can still edit individual values.
+- **Workout review:** client notes are surfaced and simple historical weight/rep PRs are flagged in History.
+- **Client weekly summary:** current weekly completion is shown above the workout.
 
-The Edge Function uses Supabase's server-side `SUPABASE_SERVICE_ROLE_KEY` environment secret. Never put that key in `index.html` or GitHub Pages.
+## Deployment
 
-## Flow
-Coach clicks + Add Client → name/email → Edge Function sends Supabase invitation and creates a pending relationship → client accepts invite → relationship becomes active → client appears as active in Coach Copilot.
+Upload the root static files to GitHub Pages exactly as for V3.3.5.
 
-Deactivation changes `coach_clients.status` to `inactive`; it does not delete training history.
+**No new Supabase SQL or Edge Function deployment is required for V3.4.** Keep the existing V3.3.5 `invite-client` Edge Function and the `activate_my_client_relationship()` RPC.
 
+## Quick Build examples
 
-V3.3.1 adds inline resend progress/success/error feedback beside each pending client.
+Single session:
 
-## V3.3.5
-Pending clients now use a password recovery/setup email for **Resend setup link**, rather than trying to invite an Auth user a second time. The PWA handles the Supabase `PASSWORD_RECOVERY` event and lets the client choose a password before opening the app.
+    Upper A
 
-Deploy the included `supabase/functions/invite-client/index.ts` over the existing `invite-client` Edge Function when deploying V3.3.5.
+    Bench press 4x5 @70kg 2 RIR
+    Pull ups 3x8
+    Incline DB press 3x8-10 @26kg
+    Chest supported row 3x10 @70kg
+    Lateral raise 3x12 @10kg
 
+    Bench press: 3 min rest, pause first rep
 
-## V3.3.5
-Recovery/setup links are detected from the URL before normal client boot, so an authenticated recovery session is forced through Finish account setup and password creation before the client app opens.
+Multiple sessions:
 
+    Programme: 3 Day Strength
+    Week: Week 1
+    Session: Upper A
+    Bench press 4x5 @70kg 2 RIR
+    Pull ups 3x8
 
-## V3.3.5
-Client account setup now activates the coach/client relationship through the restricted `activate_my_client_relationship()` RPC instead of a direct browser update that can be filtered by Row Level Security.
+    Session: Lower A
+    Leg press 3x10 @200kg
+    RDL 3x8 @80kg
 
-Run `supabase/v3.3.5-activate-client-rpc.sql` once in the Supabase SQL Editor, then upload the V3.3.5 static app files to GitHub Pages. The existing `invite-client` Edge Function does not need changing for this patch.
+Rep ranges currently use the lower number as the structured rep target and preserve the full range in coach notes (for example `8-10` becomes target reps `8` plus note `Target rep range 8–10`). This avoids a database schema change in V3.4.
