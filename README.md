@@ -54,3 +54,6 @@ Rep ranges currently use the lower number as the structured rep target and prese
 - Quick Build no longer chains `.select('id').single()` onto newly inserted sessions/exercises, avoiding the RLS failure seen when the new row was immediately returned through the SELECT policy.
 - Failed Quick Build saves now perform a best-effort child-to-parent cleanup of rows created by that attempt.
 - No Supabase policy, SQL, or Edge Function changes are required for this patch.
+
+## V3.4.2 onboarding fix
+Client onboarding now checks the authenticated client's own coach_clients relationship status. If it is still `invited`, the app forces Finish account setup even when Supabase delivers the email link as a normal SIGNED_IN session rather than PASSWORD_RECOVERY. Run `supabase/v3.4.2-onboarding-status.sql` once in Supabase before deploying this build.
