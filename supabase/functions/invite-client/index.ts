@@ -34,6 +34,15 @@ Deno.serve(async (req) => {
 
     if (resend) {
       if (!clientId) throw new Error("Missing client ID for resend.");
+      const { data: relationship, error: relationshipError } = await admin
+        .from("coach_clients")
+        .select("status")
+        .eq("coach_id", user.id)
+        .eq("client_id", clientId)
+        .maybeSingle();
+      if (relationshipError || !relationship || !["invited", "active"].includes(relationship.status)) {
+        throw new Error("An active or invited coach/client relationship is required.");
+      }
       const { data: existing, error } = await admin.auth.admin.getUserById(clientId);
       if (error || !existing.user?.email) throw new Error(`Client lookup failed: ${error?.message || "email not found"}`);
       console.log("invite-client: sending setup/recovery link", clientId);

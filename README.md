@@ -1,59 +1,67 @@
-# Coach Copilot V3.4.1 — coaching workflow
+# Coach Copilot
 
-V3.4.1 is a targeted patch to V3.4, which was built from the known-good V3.3.5 baseline. The V3.3.5 onboarding, authentication, client activation, programme delivery, workout completion and history sync flow is retained.
+A local-first **design and testing foundation**, rebuilt with React, TypeScript,
+TanStack Router, TanStack Query and Vite. Product scope is still being discussed in
+[the product workspace](docs/README.md).
 
-## V3.4 changes
+**Supabase remains the backend choice** for authentication, Postgres and Edge
+Functions. See [the retained backend and integration plan](supabase/README.md).
+The local API below is a synthetic fixture for fast design and browser testing.
 
-- **Coach-only Quick Build:** write/paste a programme in normal PT shorthand, preview the parsed structure, edit it, then create a new programme or add sessions to the current week.
-- Quick Build is deterministic and local until approval: **nothing is written to Supabase when you press Build preview.**
-- Supports common shorthand including `4x5 @70kg`, `70kg 4x5`, `3x8-10 @26kg`, RIR and coaching notes.
-- Multiple sessions can be entered with `Session: Upper A`, `Session: Lower A`, etc.
-- **Coach snapshot:** current programme, weekly completion, total completed sessions, latest sleep and last workout.
-- **Client workout shortcut:** Complete prescribed fills and marks all prescribed sets for an exercise; the client can still edit individual values.
-- **Workout review:** client notes are surfaced and simple historical weight/rep PRs are flagged in History.
-- **Client weekly summary:** current weekly completion is shown above the workout.
+## Start designing
 
-## Deployment
+Requires Node.js 24+ and npm.
 
-Upload the root static files to GitHub Pages exactly as for V3.3.5.
+```sh
+npm ci
+npm run dev
+```
 
-**No new Supabase SQL or Edge Function deployment is required for V3.4.** Keep the existing V3.3.5 `invite-client` Edge Function and the `activate_my_client_relationship()` RPC.
+Open http://localhost:5173 in any browser. The local API seeds a fictional client
+and programme automatically. Edit the programme as coach, then open **Client view**
+to see the result. No account, credentials or external service is needed.
 
-## Quick Build examples
+The **Design scenario** selector exposes populated, empty, slow, read-error and
+save-error states. Errors fail once so you can exercise retry. **Reset demo**
+restores fixtures and rearms errors. Draft fields survive failed saves; saved data
+survives reloads and navigation until the server restarts or the demo is reset.
+Browser profiles get isolated workspaces; tabs in the same profile share data.
 
-Single session:
+## Verify in real browsers
 
-    Upper A
+```sh
+npx playwright install chromium firefox webkit
+npm run check
+```
 
-    Bench press 4x5 @70kg 2 RIR
-    Pull ups 3x8
-    Incline DB press 3x8-10 @26kg
-    Chest supported row 3x10 @70kg
-    Lateral raise 3x12 @10kg
+`check` runs TypeScript, a production build, and the browser integration suite
+against the built app and local HTTP API. Chromium, Firefox and mobile WebKit run
+the same journeys. Tests have isolated workspaces and need no running dev server.
 
-    Bench press: 3 min rest, pause first rep
+For the short feedback loop:
 
-Multiple sessions:
+```sh
+npm run test:browser:quick  # Chromium against the dev server
+npm run test:ui            # interactive browser runner against the dev server
+npm run test:headed       # watch Chromium run
+npm run test:report       # inspect the last report and failure traces
+```
 
-    Programme: 3 Day Strength
-    Week: Week 1
-    Session: Upper A
-    Bench press 4x5 @70kg 2 RIR
-    Pull ups 3x8
+Playwright owns port 4173; development uses 5173. CI runs `check` and retains the
+HTML report, screenshots and traces on failure.
 
-    Session: Lower A
-    Leg press 3x10 @200kg
-    RDL 3x8 @80kg
+## Where to work
 
-Rep ranges currently use the lower number as the structured rep target and preserve the full range in coach notes (for example `8-10` becomes target reps `8` plus note `Target rep range 8–10`). This avoids a database schema change in V3.4.
+- `src/router.tsx`: typed routes and application shell.
+- `src/programme.tsx`: the coach editor and client view, with Query reads/mutations.
+- `src/styles.css`: responsive design tokens and UI styling; Vite updates instantly.
+- `src/api.ts`, `src/model.ts`: HTTP boundary and shared prototype data types.
+- `dev/local-api.ts`: synthetic API, fixtures, scenarios and reset behavior.
+- `tests/browser/`: acceptance journeys through the real browser and HTTP API.
+- [Technical foundation](docs/technical-foundation.md): decisions and boundaries.
 
-
-## V3.4.1 patch
-
-- Quick Build now generates UUIDs locally for programmes, weeks, sessions, exercises and prescribed sets.
-- Quick Build no longer chains `.select('id').single()` onto newly inserted sessions/exercises, avoiding the RLS failure seen when the new row was immediately returned through the SELECT policy.
-- Failed Quick Build saves now perform a best-effort child-to-parent cleanup of rows created by that attempt.
-- No Supabase policy, SQL, or Edge Function changes are required for this patch.
-
-## V3.4.2 onboarding fix
-Client onboarding now checks the authenticated client's own coach_clients relationship status. If it is still `invited`, the app forces Finish account setup even when Supabase delivers the email link as a normal SIGNED_IN session rather than PASSWORD_RECOVERY. Run `supabase/v3.4.2-onboarding-status.sql` once in Supabase before deploying this build.
+This is a synthetic prototype, not a production coaching service. It has no
+authentication or durable database. `npm run preview` serves the built prototype
+with the same local API; serving `dist/` alone requires a future `/api` backend and
+SPA fallback. The previous app is available in Git history at `8e5b952` and in the
+original checkout. It is no longer the application entry point on this branch.
