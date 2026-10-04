@@ -26,9 +26,10 @@ async function plan(sb = actors.coach, relationship = f.relationship, status = '
   const programme = await insert(sb, 'programmes', { relationship_id: relationship, name: 'Permissions plan', status });
   const week = await insert(sb, 'programme_weeks', { programme_id: programme.id, position: 1, name: 'Week' });
   const session = await insert(sb, 'sessions', { week_id: week.id, position: 1, name: 'Session' });
-  const prescription = await insert(sb, 'exercise_prescriptions', { session_id: session.id, exercise_id: f.exercise, position: 1, display_name: 'Press' });
+  const block = await insert(sb, 'session_blocks', { session_id: session.id, position: 1, kind: 'single' });
+  const prescription = await insert(sb, 'exercise_prescriptions', { session_id: session.id, block_id: block.id, exercise_id: f.exercise, position: 1, display_name: 'Press' });
   const set = await insert(sb, 'prescribed_sets', { prescription_id: prescription.id, position: 1, reps_min: 5 });
-  return { programmes: programme, programme_weeks: week, sessions: session, exercise_prescriptions: prescription, prescribed_sets: set };
+  return { programmes: programme, programme_weeks: week, sessions: session, session_blocks: block, exercise_prescriptions: prescription, prescribed_sets: set };
 }
 async function proposal(p, sb = admin, overrides = {}) {
   return checked(await sb.rpc('create_adaptation_proposal', {
@@ -62,10 +63,12 @@ before(async () => {
     conversations: chat, messages: message, adaptation_proposals: a,
     proposal_sessions: checked(await admin.from('proposal_sessions').select().eq('proposal_id', a.id).single()),
     proposed_exercises: proposed,
+    proposed_blocks: checked(await admin.from('proposed_blocks').select().eq('id', proposed.block_id).single()),
     proposal_exercise_sources: checked(await admin.from('proposal_exercise_sources').select().eq('proposed_exercise_id', proposed.id).single()),
     workouts: workout,
     workout_sources: checked(await admin.from('workout_sources').select().eq('workout_id', workout.id).single()),
     workout_exercises: occurrence,
+    workout_blocks: checked(await admin.from('workout_blocks').select().eq('id', occurrence.block_id).single()),
     workout_exercise_sources: checked(await admin.from('workout_exercise_sources').select().eq('workout_exercise_id', occurrence.id).single()),
     logged_sets: checked(await admin.from('logged_sets').select().eq('workout_exercise_id', occurrence.id).single()),
     workout_feedback: checked(await admin.from('workout_feedback').select().eq('workout_id', workout.id).single()),
@@ -76,12 +79,12 @@ before(async () => {
 // check fails when the schema grows without an accompanying matrix update.
 const tables = [
   'profiles', 'coach_clients', 'exercises', 'exercise_instructions', 'exercise_media',
-  'programmes', 'programme_weeks', 'sessions', 'exercise_prescriptions', 'prescribed_sets',
-  'conversations', 'messages', 'adaptation_proposals', 'proposal_sessions', 'proposed_exercises', 'proposal_exercise_sources',
-  'workouts', 'workout_sources', 'workout_exercises', 'workout_exercise_sources', 'logged_sets', 'workout_feedback',
+  'programmes', 'programme_weeks', 'sessions', 'session_blocks', 'exercise_prescriptions', 'prescribed_sets',
+  'conversations', 'messages', 'adaptation_proposals', 'proposal_sessions', 'proposed_blocks', 'proposed_exercises', 'proposal_exercise_sources',
+  'workouts', 'workout_sources', 'workout_blocks', 'workout_exercises', 'workout_exercise_sources', 'logged_sets', 'workout_feedback',
 ];
-const coachEditable = ['exercises', 'exercise_instructions', 'programmes', 'programme_weeks', 'sessions', 'exercise_prescriptions', 'prescribed_sets'];
-const privateTables = ['conversations', 'messages', 'adaptation_proposals', 'proposal_sessions', 'proposed_exercises', 'proposal_exercise_sources'];
+const coachEditable = ['exercises', 'exercise_instructions', 'programmes', 'programme_weeks', 'sessions', 'session_blocks', 'exercise_prescriptions', 'prescribed_sets'];
+const privateTables = ['conversations', 'messages', 'adaptation_proposals', 'proposal_sessions', 'proposed_blocks', 'proposed_exercises', 'proposal_exercise_sources'];
 
 for (const table of tables) {
   test(`${table}: role matrix for reads and forbidden direct C/U/D`, async () => {
@@ -133,8 +136,8 @@ test('profiles: own display name updates; identity, role and timestamps cannot c
 test('programme hierarchy: owner CRUD, immutable parents, revision changes and cascading delete', async () => {
   const p = await plan();
   const other = await plan();
-  const changes = { programmes: { name: 'Renamed' }, programme_weeks: { notes: 'Week notes' }, sessions: { notes: 'Session notes' }, exercise_prescriptions: { coach_notes: 'New cue' }, prescribed_sets: { reps_min: 8 } };
-  const parents = { programmes: ['relationship_id', f.relationship], programme_weeks: ['programme_id', other.programmes.id], sessions: ['week_id', other.programme_weeks.id], exercise_prescriptions: ['session_id', other.sessions.id], prescribed_sets: ['prescription_id', other.exercise_prescriptions.id] };
+  const changes = { programmes: { name: 'Renamed' }, programme_weeks: { notes: 'Week notes' }, sessions: { notes: 'Session notes' }, session_blocks: { label: 'Block A' }, exercise_prescriptions: { coach_notes: 'New cue' }, prescribed_sets: { reps_min: 8 } };
+  const parents = { programmes: ['relationship_id', f.relationship], programme_weeks: ['programme_id', other.programmes.id], sessions: ['week_id', other.programme_weeks.id], session_blocks: ['session_id', other.sessions.id], exercise_prescriptions: ['session_id', other.sessions.id], prescribed_sets: ['prescription_id', other.exercise_prescriptions.id] };
   for (const table of Object.keys(p)) {
     const revision = checked(await actors.coach.from('programmes').select('revision').eq('id', p.programmes.id).single()).revision;
     assert.equal(checked(await actors.coach.from(table).update(changes[table]).eq('id', p[table].id).select()).length, 1);
@@ -199,7 +202,7 @@ test('custom catalogue: owner CRUD, instruction ownership and historical referen
   checked(await actors.coach.from('exercise_prescriptions').update({ exercise_id: e.id }).eq('id', p.exercise_prescriptions.id));
   assert.equal((await actors.coach.from('exercises').delete().eq('id', e.id)).error?.code, '23503');
   checked(await actors.coach.from('exercises').update({ retired_at: new Date().toISOString() }).eq('id', e.id));
-  assert.equal((await actors.coach.from('exercise_prescriptions').insert({ session_id: p.sessions.id, exercise_id: e.id, position: 2, display_name: 'Retired' })).error?.code, '23514');
+  assert.equal((await actors.coach.from('exercise_prescriptions').insert({ session_id: p.sessions.id, block_id: p.session_blocks.id, exercise_id: e.id, position: 2, display_name: 'Retired' })).error?.code, '23514');
   checked(await actors.coach.from('programmes').delete().eq('id', p.programmes.id));
   assert.equal(checked(await actors.coach.from('exercise_instructions').delete().match(keyOf('exercise_instructions', i)).select()).length, 1);
   assert.equal(checked(await actors.coach.from('exercises').delete().eq('id', e.id).select()).length, 1);
@@ -219,7 +222,7 @@ test('chat lifecycle: own deletion cascades messages; linked proposals protect c
 });
 
 test('workout history prevents deletion of referenced programme/session/prescription and proposal', async () => {
-  for (const table of ['programmes', 'programme_weeks', 'sessions', 'exercise_prescriptions']) {
+  for (const table of ['programmes', 'programme_weeks', 'sessions', 'session_blocks', 'exercise_prescriptions']) {
     assert.equal((await actors.coach.from(table).delete().eq('id', rows[table].id)).error?.code, '23503', table);
     assert.equal(checked(await select(admin, table, { id: rows[table].id })).length, 1);
   }
@@ -308,6 +311,7 @@ test('programme constraints: names, positions, targets, uniqueness and missing f
   const patches = {
     programmes: [{ name: ' ' }, { name: 'x'.repeat(201) }, { status: 'unknown' }],
     programme_weeks: [{ position: 0 }, { name: '' }], sessions: [{ position: -1 }, { name: '' }],
+    session_blocks: [{ position: 0 }, { kind: 'invalid' }, { rest_after_round_seconds: -1 }],
     exercise_prescriptions: [{ position: 0 }, { display_name: '' }],
     prescribed_sets: [{ load_kg: -1 }, { load_kg: 'NaN' }, { load_kg: 'Infinity' }, { reps_min: 0 },
       { reps_min: null, reps_max: 5 }, { reps_min: 5, reps_max: 4 }, { rir: 11 }, { rest_seconds: -1 }],
@@ -319,10 +323,10 @@ test('programme constraints: names, positions, targets, uniqueness and missing f
       assert.deepEqual(checked(await select(admin, table, { id: p[table].id })), original);
     }
   }
-  for (const table of ['programme_weeks', 'sessions', 'exercise_prescriptions', 'prescribed_sets']) {
+  for (const table of ['programme_weeks', 'sessions', 'session_blocks', 'exercise_prescriptions', 'prescribed_sets']) {
     assert.equal((await actors.coach.from(table).insert({ ...p[table], id: randomUUID() })).error?.code, '23505', table);
   }
-  assert.equal((await admin.from('exercise_prescriptions').insert({ session_id: randomUUID(), position: 1, display_name: 'Missing' })).error?.code, '23503');
+  assert.equal((await admin.from('exercise_prescriptions').insert({ session_id: randomUUID(), block_id: p.session_blocks.id, position: 1, display_name: 'Missing' })).error?.code, '23503');
 });
 
 test('proposal validation rejects malformed targets, foreign provenance and another client conversation atomically', async () => {
@@ -438,7 +442,7 @@ test('deactivation revokes coach history/profile access; client can finish their
   try {
     assert.deepEqual(checked(await select(actors.coach, 'profiles', { id: f.client })), []);
     assert.deepEqual(checked(await select(actors.client, 'profiles', { id: f.coach })), []);
-    for (const table of ['workouts', 'workout_sources', 'workout_exercises', 'workout_exercise_sources', 'logged_sets', 'workout_feedback', 'exercises', 'exercise_instructions', 'exercise_media']) {
+    for (const table of ['workouts', 'workout_sources', 'workout_blocks', 'workout_exercises', 'workout_exercise_sources', 'logged_sets', 'workout_feedback', 'exercises', 'exercise_instructions', 'exercise_media']) {
       const sb = table.startsWith('exercise') ? actors.client : actors.coach;
       assert.deepEqual(checked(await select(sb, table, keyOf(table, rows[table]))), [], table);
     }
@@ -458,7 +462,7 @@ test('trusted deletion of an unshared test aggregate cascades every workout and 
   const e = checked(await admin.from('workout_exercises').select().eq('workout_id', w.id).single());
   checked(await actors.client.rpc('save_workout', { workout_id: w.id, exercises: [], feedback: { notes: 'Fixture' } }));
   checked(await admin.from('workouts').delete().eq('id', w.id));
-  for (const table of ['workout_sources', 'workout_exercises', 'workout_feedback']) assert.deepEqual(checked(await admin.from(table).select().eq('workout_id', w.id)), []);
+  for (const table of ['workout_sources', 'workout_blocks', 'workout_exercises', 'workout_feedback']) assert.deepEqual(checked(await admin.from(table).select().eq('workout_id', w.id)), []);
   for (const table of ['workout_exercise_sources', 'logged_sets']) assert.deepEqual(checked(await admin.from(table).select().eq('workout_exercise_id', e.id)), []);
   checked(await admin.from('adaptation_proposals').delete().eq('id', a.id));
   assert.deepEqual(checked(await admin.from('proposal_exercise_sources').select().eq('proposed_exercise_id', proposed.id)), []);

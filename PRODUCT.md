@@ -57,6 +57,9 @@ Confirmed direction and initial rules:
   the required Gym Visual media licence; attribution and provenance must be retained.
 - New UI uses Mantine, starting with its default theme and Mantine UI examples;
   custom branding comes later. Retain TanStack Router and Query.
+- Supersets are required: ordered exercise pairs with per-exercise targets/results,
+  performed A1 → A2 → rest → repeat. Rest is prescribed after the complete round,
+  not after each exercise. See `docs/architecture/training-blocks.md`.
 - Development supports synthetic local testing and repeatable browser CI without
   requiring a hosted Supabase account.
 

@@ -5,7 +5,7 @@ foundation; the current design UI still uses its synthetic API. No hosted deploy
 or live AI model is connected.
 
 See [domain permissions and verification](domain-security.md) for the complete
-22-table actor/operation matrix and executable security coverage.
+25-table actor/operation matrix and executable security coverage.
 
 ## Confirmed decisions
 
@@ -42,10 +42,10 @@ Implementation conventions for this first slice:
 | --- | --- |
 | Identity / coaching | `profiles`, `coach_clients` (auth identities live in `auth.users`) |
 | Exercise library | `exercises`, `exercise_instructions`, `exercise_media` |
-| Prescription | `programmes`, `programme_weeks`, `sessions`, `exercise_prescriptions`, `prescribed_sets` |
+| Prescription | `programmes`, `programme_weeks`, `sessions`, `session_blocks`, `exercise_prescriptions`, `prescribed_sets` |
 | Private conversation | `conversations`, `messages` |
-| Adaptation | `adaptation_proposals`, `proposal_sessions`, `proposed_exercises`, `proposal_exercise_sources` |
-| Performance | `workouts`, `workout_sources`, `workout_exercises`, `workout_exercise_sources`, `logged_sets`, `workout_feedback` |
+| Adaptation | `adaptation_proposals`, `proposal_sessions`, `proposed_blocks`, `proposed_exercises`, `proposal_exercise_sources` |
+| Performance | `workouts`, `workout_sources`, `workout_blocks`, `workout_exercises`, `workout_exercise_sources`, `logged_sets`, `workout_feedback` |
 
 All public domain tables have RLS. Anonymous API requests have no table grants.
 Private authorization helpers are outside the exposed schema. Profile role updates,
@@ -108,6 +108,12 @@ permission does not imply access to anyone else's programmes or logs.
 The API caps reads at 1,000 rows. Paginate catalogue results with `.range(...)`;
 the full library has 1,324 imported exercises in addition to isolated test fixtures.
 
+Sessions contain ordered `session_blocks` (`single` or `superset`). Each prescription
+requires a `block_id` within its own session. Read blocks by position, then their
+exercise prescriptions by position. Supersets perform A1 → A2 → rest → repeat;
+`rest_after_round_seconds` applies after the whole pair. See
+[training blocks](training-blocks.md) for authoring, snapshots and proposal inputs.
+
 ### Workout commands
 
 | RPC | Inputs | Behaviour |
@@ -154,6 +160,10 @@ and `exercises` with `position`, `exercise_id`, `display_name`, `notes`, `target
 `source_prescription_ids`. Targets use `position`, `load_kg`, `reps_min`, `reps_max`, `rir`.
 Sources must belong to the selected client's published sessions. The function records
 the current programme revision, validates references/targets and rolls back partial failure.
+
+Optional `blocks` defines proposal grouping with `position`, `kind`, `label`,
+`rest_after_round_seconds` and `exercise_positions`. Every proposed exercise position
+must occur exactly once. Omitting it explicitly produces standalone exercise blocks.
 
 The client applies it through `start_workout` with the proposal ID. Changed programme
 revisions, another client's proposal, mismatched sources and already-applied proposals

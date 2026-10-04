@@ -7,7 +7,7 @@ and verifying the stored state after denied operations.
 
 ## Actor and operation matrix
 
-The HTTP suite explicitly inventories all **22 public domain tables**. Each table
+The HTTP suite explicitly inventories all **25 public domain tables**. Each table
 is read as anonymous, owning client, owning coach, unrelated client, unrelated
 coach and trusted service. Every forbidden direct insert/update/delete is tested.
 Allowed operations are exercised in the lifecycle tests below. A denied update
@@ -29,16 +29,19 @@ table privileges and RLS bypass, still subject to constraints/triggers.
 | `programmes` | R active published plan | C/R/U/D own invited/active relationship | Parent immutable; unreferenced hierarchy deletable; archive retains workout history. |
 | `programme_weeks` | R through visible plan | C/R/U/D through manageable plan | Parent immutable; cascading delete if history permits. |
 | `sessions` | R through visible plan | C/R/U/D through manageable plan | Parent immutable; source references prevent deletion. |
+| `session_blocks` | R through visible plan | C/R/U/D through manageable plan | Session immutable; edits increment revision; deleting a block cascades prescriptions only if history permits. |
 | `exercise_prescriptions` | R through visible plan | C/R/U/D through manageable plan | Parent immutable; exercise must be accessible; provenance references prevent deletion. |
 | `prescribed_sets` | R through visible plan | C/R/U/D through manageable plan | Changes increment programme revision; existing workout snapshots survive edits/deletion. |
 | `conversations` | C/R/D own | None | Deletion cascades messages unless a proposal references the conversation. |
 | `messages` | C own user messages; R own chat | None | Append-only client API; assistant writes trusted; conversation deletion cascades. |
 | `adaptation_proposals` | R own; reject/apply via RPC | None | Created atomically by trusted RPC; applied workout prevents deletion. |
 | `proposal_sessions` | R own proposal | None | Trusted proposal writes; programme revision captured; cascades on proposal deletion. |
+| `proposed_blocks` | R own proposal | None | Trusted proposal grouping; cardinality/membership validated atomically; cascades on proposal deletion. |
 | `proposed_exercises` | R own proposal | None | Trusted writes with target validation; cascades on proposal deletion. |
 | `proposal_exercise_sources` | R own proposal | None | Trusted provenance linking; cascades with proposed exercise. |
 | `workouts` | R own; start/save/finish/abandon via RPC | R relevant active relationship | Public direct C/U/D forbidden; closed attempts immutable to client commands. |
 | `workout_sources` | R own workout | R relevant active relationship | Created by start; public direct writes forbidden. |
+| `workout_blocks` | R own workout | R relevant active relationship | Immutable applied grouping/rest via public API; created atomically by start/add-extra. |
 | `workout_exercises` | R own; edit/add via RPC | R relevant active relationship | Applied snapshot retained independently of actual substitutions. |
 | `workout_exercise_sources` | R own workout | R relevant active relationship | Created by start; public direct writes forbidden. |
 | `logged_sets` | R own; replace draft sets via RPC | R relevant active relationship | Empty replacement removes actual sets, not prescribed snapshot. |
@@ -64,6 +67,9 @@ client keeps their own workout history and can finish a previously started draft
 - `tests/backend/api.test.mjs`: primary domain journeys including refresh/logout,
   user-metadata role spoofing, draft recovery, concurrent start/completion, stale
   proposals and combined-workout provenance.
+- `tests/backend/supersets.test.mjs`: ordered blocks, pair-then-rest semantics,
+  per-exercise rounds/results, proposal regrouping, stale block revisions, invalid
+  memberships, snapshot stability and concurrent block-graph creation.
 
 RPC tests include rollback on invalid numeric values/JSON, source mismatch,
 cross-workout exercise IDs, concurrent application of one proposal, rejected and

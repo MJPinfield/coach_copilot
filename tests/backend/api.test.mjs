@@ -18,7 +18,8 @@ async function plan(status = 'published') {
   const programme = checked(await coach.from('programmes').insert({ relationship_id: f.relationship, name: 'Integration plan', status }).select().single());
   const week = checked(await coach.from('programme_weeks').insert({ programme_id: programme.id, position: 1, name: 'Block 1' }).select().single());
   const session = checked(await coach.from('sessions').insert({ week_id: week.id, position: 1, name: 'Upper' }).select().single());
-  const exercise = checked(await coach.from('exercise_prescriptions').insert({ session_id: session.id, exercise_id: f.exercise, position: 1, display_name: 'Press', coach_notes: 'Pause first rep' }).select().single());
+  const block = checked(await coach.from('session_blocks').insert({ session_id: session.id, position: 1, kind: 'single' }).select().single());
+  const exercise = checked(await coach.from('exercise_prescriptions').insert({ session_id: session.id, block_id: block.id, exercise_id: f.exercise, position: 1, display_name: 'Press', coach_notes: 'Pause first rep' }).select().single());
   const set = checked(await coach.from('prescribed_sets').insert({ prescription_id: exercise.id, position: 1, load_kg: 70, reps_min: 5, reps_max: 8, rir: 2 }).select().single());
   return { programme, week, session, exercise, set };
 }

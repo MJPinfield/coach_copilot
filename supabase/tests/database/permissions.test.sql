@@ -6,7 +6,7 @@ select results_eq(
   $$select tablename::text collate "C" from pg_tables where schemaname = 'public' order by tablename$$,
   $$select unnest(array['adaptation_proposals','coach_clients','conversations','exercise_instructions','exercise_media',
     'exercise_prescriptions','exercises','logged_sets','messages','prescribed_sets','profiles','programme_weeks',
-    'programmes','proposal_exercise_sources','proposal_sessions','proposed_exercises','sessions','workout_exercise_sources',
+    'programmes','proposal_exercise_sources','proposal_sessions','proposed_blocks','proposed_exercises','session_blocks','sessions','workout_blocks','workout_exercise_sources',
     'workout_exercises','workout_feedback','workout_sources','workouts']) collate "C"$$,
   'Every domain table is explicitly inventoried by the HTTP role matrix');
 
@@ -21,13 +21,13 @@ select ok(has_table_privilege('authenticated', 'public.' || tablename, 'SELECT')
 from pg_tables where schemaname = 'public';
 
 select is(has_table_privilege('authenticated', 'public.' || tablename, 'INSERT'),
-  tablename = any(array['exercises','exercise_instructions','programmes','programme_weeks','sessions','exercise_prescriptions','prescribed_sets','conversations','messages']),
+  tablename = any(array['exercises','exercise_instructions','programmes','programme_weeks','sessions','session_blocks','exercise_prescriptions','prescribed_sets','conversations','messages']),
   tablename || ': INSERT allowlist') from pg_tables where schemaname = 'public';
 select is(has_table_privilege('authenticated', 'public.' || tablename, 'UPDATE'),
-  tablename = any(array['exercises','exercise_instructions','programmes','programme_weeks','sessions','exercise_prescriptions','prescribed_sets']),
+  tablename = any(array['exercises','exercise_instructions','programmes','programme_weeks','sessions','session_blocks','exercise_prescriptions','prescribed_sets']),
   tablename || ': UPDATE allowlist') from pg_tables where schemaname = 'public';
 select is(has_table_privilege('authenticated', 'public.' || tablename, 'DELETE'),
-  tablename = any(array['exercises','exercise_instructions','programmes','programme_weeks','sessions','exercise_prescriptions','prescribed_sets','conversations']),
+  tablename = any(array['exercises','exercise_instructions','programmes','programme_weeks','sessions','session_blocks','exercise_prescriptions','prescribed_sets','conversations']),
   tablename || ': DELETE allowlist') from pg_tables where schemaname = 'public';
 select is(has_column_privilege('authenticated', 'public.profiles', column_name, 'UPDATE'), column_name = 'display_name', 'Profile column update: ' || column_name)
 from information_schema.columns where table_schema = 'public' and table_name = 'profiles';

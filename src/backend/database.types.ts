@@ -114,13 +114,13 @@ isOneToOne: false
                   ]
                 },"exercise_prescriptions": {
                   Row: {
-                    "coach_notes": string,"display_name": string,"exercise_id": string | null,"id": string,"position": number,"session_id": string
+                    "block_id": string,"coach_notes": string,"display_name": string,"exercise_id": string | null,"id": string,"position": number,"session_id": string
                   }
                   Insert: {
-                    "coach_notes"?: string,"display_name": string,"exercise_id"?: string | null,"id"?: string,"position": number,"session_id": string
+                    "block_id": string,"coach_notes"?: string,"display_name": string,"exercise_id"?: string | null,"id"?: string,"position": number,"session_id": string
                   }
                   Update: {
-                    "coach_notes"?: string,"display_name"?: string,"exercise_id"?: string | null,"id"?: string,"position"?: number,"session_id"?: string
+                    "block_id"?: string,"coach_notes"?: string,"display_name"?: string,"exercise_id"?: string | null,"id"?: string,"position"?: number,"session_id"?: string
                   }
                   Relationships: [
                     {
@@ -129,6 +129,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "exercises"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "exercise_prescriptions_session_id_block_id_fkey"
+      columns: ["session_id","block_id"]
+isOneToOne: false
+      referencedRelation: "session_blocks"
+      referencedColumns: ["session_id","id"]
     },{
       foreignKeyName: "exercise_prescriptions_session_id_fkey"
       columns: ["session_id"]
@@ -314,15 +320,34 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"proposed_exercises": {
+                },"proposed_blocks": {
                   Row: {
-                    "display_name": string,"exercise_id": string | null,"id": string,"notes": string,"position": number,"proposal_id": string,"targets": NonNullable<Json>
+                    "id": string,"kind": string,"label": string,"position": number,"proposal_id": string,"rest_after_round_seconds": number | null
                   }
                   Insert: {
-                    "display_name": string,"exercise_id"?: string | null,"id"?: string,"notes"?: string,"position": number,"proposal_id": string,"targets": NonNullable<Json>
+                    "id"?: string,"kind": string,"label"?: string,"position": number,"proposal_id": string,"rest_after_round_seconds"?: number | null
                   }
                   Update: {
-                    "display_name"?: string,"exercise_id"?: string | null,"id"?: string,"notes"?: string,"position"?: number,"proposal_id"?: string,"targets"?: NonNullable<Json>
+                    "id"?: string,"kind"?: string,"label"?: string,"position"?: number,"proposal_id"?: string,"rest_after_round_seconds"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "proposed_blocks_proposal_id_fkey"
+      columns: ["proposal_id"]
+isOneToOne: false
+      referencedRelation: "adaptation_proposals"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"proposed_exercises": {
+                  Row: {
+                    "block_id": string,"display_name": string,"exercise_id": string | null,"id": string,"notes": string,"position": number,"proposal_id": string,"targets": NonNullable<Json>
+                  }
+                  Insert: {
+                    "block_id": string,"display_name": string,"exercise_id"?: string | null,"id"?: string,"notes"?: string,"position": number,"proposal_id": string,"targets": NonNullable<Json>
+                  }
+                  Update: {
+                    "block_id"?: string,"display_name"?: string,"exercise_id"?: string | null,"id"?: string,"notes"?: string,"position"?: number,"proposal_id"?: string,"targets"?: NonNullable<Json>
                   }
                   Relationships: [
                     {
@@ -332,10 +357,35 @@ isOneToOne: false
       referencedRelation: "exercises"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "proposed_exercises_proposal_id_block_id_fkey"
+      columns: ["proposal_id","block_id"]
+isOneToOne: false
+      referencedRelation: "proposed_blocks"
+      referencedColumns: ["proposal_id","id"]
+    },{
       foreignKeyName: "proposed_exercises_proposal_id_fkey"
       columns: ["proposal_id"]
 isOneToOne: false
       referencedRelation: "adaptation_proposals"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"session_blocks": {
+                  Row: {
+                    "id": string,"kind": string,"label": string,"position": number,"rest_after_round_seconds": number | null,"session_id": string
+                  }
+                  Insert: {
+                    "id"?: string,"kind": string,"label"?: string,"position": number,"rest_after_round_seconds"?: number | null,"session_id": string
+                  }
+                  Update: {
+                    "id"?: string,"kind"?: string,"label"?: string,"position"?: number,"rest_after_round_seconds"?: number | null,"session_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "session_blocks_session_id_fkey"
+      columns: ["session_id"]
+isOneToOne: false
+      referencedRelation: "sessions"
       referencedColumns: ["id"]
     }
                   ]
@@ -355,6 +405,25 @@ isOneToOne: false
       columns: ["week_id"]
 isOneToOne: false
       referencedRelation: "programme_weeks"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"workout_blocks": {
+                  Row: {
+                    "applied_snapshot": NonNullable<Json>,"id": string,"kind": string,"label": string,"position": number,"rest_after_round_seconds": number | null,"workout_id": string
+                  }
+                  Insert: {
+                    "applied_snapshot": NonNullable<Json>,"id"?: string,"kind": string,"label"?: string,"position": number,"rest_after_round_seconds"?: number | null,"workout_id": string
+                  }
+                  Update: {
+                    "applied_snapshot"?: NonNullable<Json>,"id"?: string,"kind"?: string,"label"?: string,"position"?: number,"rest_after_round_seconds"?: number | null,"workout_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "workout_blocks_workout_id_fkey"
+      columns: ["workout_id"]
+isOneToOne: false
+      referencedRelation: "workouts"
       referencedColumns: ["id"]
     }
                   ]
@@ -385,13 +454,13 @@ isOneToOne: false
                   ]
                 },"workout_exercises": {
                   Row: {
-                    "applied_snapshot": NonNullable<Json>,"exercise_id": string | null,"id": string,"performed_name": string,"position": number,"workout_id": string
+                    "applied_snapshot": NonNullable<Json>,"block_id": string,"exercise_id": string | null,"id": string,"performed_name": string,"position": number,"workout_id": string
                   }
                   Insert: {
-                    "applied_snapshot": NonNullable<Json>,"exercise_id"?: string | null,"id"?: string,"performed_name": string,"position": number,"workout_id": string
+                    "applied_snapshot": NonNullable<Json>,"block_id": string,"exercise_id"?: string | null,"id"?: string,"performed_name": string,"position": number,"workout_id": string
                   }
                   Update: {
-                    "applied_snapshot"?: NonNullable<Json>,"exercise_id"?: string | null,"id"?: string,"performed_name"?: string,"position"?: number,"workout_id"?: string
+                    "applied_snapshot"?: NonNullable<Json>,"block_id"?: string,"exercise_id"?: string | null,"id"?: string,"performed_name"?: string,"position"?: number,"workout_id"?: string
                   }
                   Relationships: [
                     {
@@ -400,6 +469,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "exercises"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "workout_exercises_workout_id_block_id_fkey"
+      columns: ["workout_id","block_id"]
+isOneToOne: false
+      referencedRelation: "workout_blocks"
+      referencedColumns: ["workout_id","id"]
     },{
       foreignKeyName: "workout_exercises_workout_id_fkey"
       columns: ["workout_id"]
@@ -509,6 +584,7 @@ isOneToOne: true
 "add_workout_exercise":
 { Args: { "display_name": string,"exercise_id": string,"workout_id": string }; Returns: {
               "applied_snapshot": NonNullable<Json>,
+"block_id": string,
 "exercise_id": string | null,
 "id": string,
 "performed_name": string,
@@ -522,7 +598,7 @@ isOneToOne: true
         isSetofReturn: false
       } },
 "create_adaptation_proposal":
-{ Args: { "client_id": string,"conversation_id"?: string,"exercises": Json,"reason": string,"session_ids": (string)[] }; Returns: {
+{ Args: { "blocks"?: Json,"client_id": string,"conversation_id"?: string,"exercises": Json,"reason": string,"session_ids": (string)[] }; Returns: {
               "client_id": string,
 "conversation_id": string | null,
 "created_at": string,
