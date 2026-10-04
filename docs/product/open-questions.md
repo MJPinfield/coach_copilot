@@ -32,7 +32,12 @@ instead of adopting another coaching app?
 or a broader audience? Which complete journey must work, and what can wait?
 What devices and gym connectivity must that slice support?
 
-**Answer / decision:** _To discuss._
+**Answer / decision:** **Partially confirmed by Max**, 2026-10-04: the product focus
+is Mark authoring programmes and clients such as Max following/logging workouts
+with training-aware text AI assistance. Mark must also be able to use the app on
+mobile. Offline training is required: clients can continue logging without gym
+signal and sync later. Initial audience size and the complete first-release slice
+remain open. See the durable product record in `PRODUCT.md` at the repository root.
 
 ## Model the coaching loop
 
@@ -94,7 +99,11 @@ Can completed workouts be corrected, by whom, and with what visibility of change
 
 **Affected stories:** US-08, US-10, US-11, US-12.
 
-**Answer / decision:** _To discuss._
+**Answer / decision:** **Offline requirement confirmed by Max**, 2026-10-04:
+clients must be able to continue logging without gym signal and sync later.
+Initial offline preparation, conflict resolution, cross-device recovery and
+completed-workout correction rules remain open. This requirement is not yet
+implemented in the design prototype.
 
 ## Make the information meaningful
 
