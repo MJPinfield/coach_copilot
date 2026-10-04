@@ -7,15 +7,19 @@ approved specification or a commitment to reproduce the current app.
 ## Start here
 
 1. [Product brief](product-brief.md) — the problem, people and outcomes.
-2. [Domain model](domain-model.md) — shared language and lifecycle questions from the historical app.
-3. [Open questions](open-questions.md) — decisions needed before choosing scope.
-4. [Technical foundation](technical-foundation.md) — the current rebuild and browser workflow.
+2. [Product inventory](current-product.md) — the current prototype and historical app inventory.
+3. [Domain model](domain-model.md) — shared language and lifecycle questions from the historical app.
+4. [Draft user stories](user-stories.md) — outcomes and proposed acceptance scenarios.
+5. [Open questions](open-questions.md) — decisions needed before choosing scope.
+6. [Comparable products](product-research.md) — official-source research and proposed directions.
+7. [Technical foundation](technical-foundation.md) — the current rebuild and browser workflow.
 
 [Story template](story-template.md) · [Historical technical checkpoint](technical-checkpoint.md)
 
-The previous workspace referred to a current-product inventory and user-story
-backlog that were not present when copied. Existing story IDs remain discussion
-references; create agreed stories using the template as scope becomes clear.
+The inventory, draft stories and product research were recovered from the
+pre-rebuild workspace. Story IDs are preserved so existing questions and discussion
+references resolve. Historical evidence is not proof of capability in the current
+prototype; agree scope and verify stories against the rebuilt app as work progresses.
 
 ## How we will work
 
