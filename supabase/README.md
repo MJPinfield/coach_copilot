@@ -41,6 +41,11 @@ records that confirmation as the rights reference. Assets currently resolve to t
 pinned upstream revision; production hosting and offline availability remain separate
 decisions. No binary media collection is committed to this repository.
 
+The importer also populates explicit imported muscle/group mappings and initial
+bench-press family membership; ambiguous anatomy stays unmapped and coach reviews
+are preserved. See [exercise analysis](../docs/architecture/exercise-analysis.md)
+for the mapping and load contract.
+
 The small synthetic exercise used by integration tests is separate from that real
 catalogue. CI does not depend on fetching 1,324 exercises or external media.
 
@@ -72,7 +77,7 @@ both jobs independently; the backend job needs no hosted Supabase account or sec
 - `../src/backend/database.types.ts`: generated types; use `npm run backend:types` after migrations.
 - `../src/backend/client.ts`: typed public-key SDK factory for future UI features.
 - [Backend API and decisions](../docs/architecture/backend-api.md): roles, tables, commands and limitations.
-- [Domain security matrix](../docs/architecture/domain-security.md): all 25 tables,
+- [Domain security matrix](../docs/architecture/domain-security.md): all 31 tables,
   role-specific CRUD, lifecycle/deletion rules and executable security coverage.
 
 Copy `.env.example` to `.env.local` and fill the local publishable key when connecting

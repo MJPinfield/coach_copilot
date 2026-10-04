@@ -65,6 +65,10 @@ as JSON rather than additional columns; the backend API documents the concrete c
 
 ### Exercise
 
+Structured anatomy, versioned family membership and load conventions are now implemented;
+see [exercise analysis](exercise-analysis.md). The fields below remain the raw catalogue
+identity and source metadata, rather than the authoritative analytical taxonomy.
+
 | Field | Meaning / rule |
 | --- | --- |
 | `id` | Stable application-owned exercise ID; not its name or media filename |

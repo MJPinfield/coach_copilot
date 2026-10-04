@@ -7,7 +7,7 @@ and verifying the stored state after denied operations.
 
 ## Actor and operation matrix
 
-The HTTP suite explicitly inventories all **25 public domain tables**. Each table
+The HTTP suites explicitly inventory all **31 public domain tables**. Each table
 is read as anonymous, owning client, owning coach, unrelated client, unrelated
 coach and trusted service. Every forbidden direct insert/update/delete is tested.
 Allowed operations are exercised in the lifecycle tests below. A denied update
@@ -16,8 +16,9 @@ constraint error does not count as a successful permission test. Stored rows are
 checked again through the service after denied writes.
 
 `R` = read, `C` = create, `U` = update, `D` = delete. Anonymous users have none of
-these operations. The service role is a trusted administrative boundary with full
-table privileges and RLS bypass, still subject to constraints/triggers.
+these operations. The service role is a trusted administrative boundary with RLS
+bypass, still subject to constraints/triggers. Analysis revisions and mappings are
+an exception to its direct write privileges: they require the revision RPC.
 
 | Table | Client | Owning coach | Lifecycle / deletion rule |
 | --- | --- | --- | --- |
@@ -117,3 +118,18 @@ verified. No authenticated UI, live AI provider, account-erasure workflow or pro
 email-delivery failure simulation is included in this backend test suite. Chat with
 linked proposals and completed workout history intentionally have no public erasure
 operation; retention/erasure is a future explicit product contract.
+
+## Exercise analysis extension
+
+Migration 006 adds six tables (31 total): `muscle_groups`, `muscles`,
+`muscle_group_members`, `exercise_families`, `exercise_analysis_revisions`, and
+`exercise_muscle_mappings`. Taxonomy is readable by authenticated users and writable
+only by the service role. Revisions/mappings follow exercise visibility and cannot be
+written directly, even by the service role. `revise_exercise_analysis` is the only
+API write path: owning coaches may review custom exercises; trusted service callers
+may classify shared entries. Clients, unrelated coaches and anonymous users cannot
+revise another coach's exercise. Reviewer impersonation is rejected.
+
+The HTTP role coverage for these tables and the ninth public RPC lives in
+`tests/backend/exercise-analysis.test.mjs`; pgTAP inventories all 31 tables and nine
+RPCs. See [exercise analysis](exercise-analysis.md) for revision and snapshot semantics.

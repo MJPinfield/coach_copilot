@@ -75,8 +75,8 @@ before(async () => {
   };
 });
 
-// This inventory deliberately enumerates every domain table. The pgTAP inventory
-// check fails when the schema grows without an accompanying matrix update.
+// This inventory covers the original domain tables. The six analysis/taxonomy
+// tables have their role matrix in exercise-analysis.test.mjs; pgTAP inventories both.
 const tables = [
   'profiles', 'coach_clients', 'exercises', 'exercise_instructions', 'exercise_media',
   'programmes', 'programme_weeks', 'sessions', 'session_blocks', 'exercise_prescriptions', 'prescribed_sets',

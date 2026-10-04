@@ -33,11 +33,15 @@ These are discussion boundaries, not a recommendation to split the application i
 | Prescribed session | A planned training session within a programme | This is the plan, not evidence that training occurred |
 | Exercise prescription | A movement and the instructions for performing it in a session | An occurrence of an exercise is different from the identity of that exercise |
 | Library exercise | A stable movement identity with equipment and descriptive metadata | A display name or alias is not the identity; keep variants distinct |
+| Exercise family | An organisational grouping of related exact exercises | Versioned membership does not imply equivalent strength or interchangeable movements |
+| Exercise classification | A versioned family and muscle/group mapping for one exact exercise | Imported or coach-reviewed; historical interpretation is snapshotted |
+| Muscle involvement | A primary, secondary or stabiliser role at explicit muscle/group granularity | No inferred contribution percentages or expansion of broad labels into specific muscles |
 | Exercise instruction | General guidance for a library movement, optionally by language | Separate from Mark's specific cues and prescribed targets |
 | Exercise media | Demonstration/thumbnail associated with a library movement | May be absent; source reference, attribution and reuse rights are separate concerns |
 | Prescribed set | Targets or guidance for a set | A range, a fixed target and an optional target may have different meanings |
 | Workout / training attempt | One occasion when a client performs training | May differ from, partially fulfil, or repeat a prescribed session |
 | Logged set | What the client recorded for a set, including whether it was performed | Current `completed_sets` storage also contains unchecked sets |
+| Load convention | How a prescribed or actual kilogram value must be interpreted | Total load, per-dumbbell, added bodyweight, assistance, machine display, bodyweight or unknown |
 | Workout feedback | The client's report of context, experience or concerns | A default value is not necessarily an explicit report |
 | Adherence | An agreed comparison of intended and performed training | Must define the plan, period and what counts |
 | Personal record (PR) | A qualifying improvement against comparable previous performance | Requires agreed exercise identity, eligible sets and comparison rules |

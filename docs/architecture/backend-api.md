@@ -5,7 +5,7 @@ foundation; the current design UI still uses its synthetic API. No hosted deploy
 or live AI model is connected.
 
 See [domain permissions and verification](domain-security.md) for the complete
-25-table actor/operation matrix and executable security coverage.
+31-table actor/operation matrix and executable security coverage.
 
 ## Confirmed decisions
 
@@ -186,3 +186,9 @@ Browser tests still exercise the design UI, not a live authenticated UI. Real mo
 behaviour, production email deliverability and a hosted deployment are not established
 by these tests. Connect the UI to `src/backend/client.ts` next, then add those browser
 journeys against this backend.
+
+## Exercise analysis extension
+
+Migration 006 adds structured muscles/groups, versioned exercise-family and muscle
+mappings, `revise_exercise_analysis`, historical classification snapshots, and explicit
+prescribed/proposed/actual set load conventions. See the [complete contract](exercise-analysis.md).

@@ -74,6 +74,50 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"exercise_analysis_revisions": {
+                  Row: {
+                    "created_at": string,"exercise_id": string,"family_id": string | null,"id": string,"provenance": string,"reviewed_by": string | null,"revision": number,"source_reference": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"exercise_id": string,"family_id"?: string | null,"id"?: string,"provenance": string,"reviewed_by"?: string | null,"revision": number,"source_reference": string
+                  }
+                  Update: {
+                    "created_at"?: string,"exercise_id"?: string,"family_id"?: string | null,"id"?: string,"provenance"?: string,"reviewed_by"?: string | null,"revision"?: number,"source_reference"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "exercise_analysis_revisions_exercise_id_fkey"
+      columns: ["exercise_id"]
+isOneToOne: false
+      referencedRelation: "exercises"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "exercise_analysis_revisions_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "exercise_families"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "exercise_analysis_revisions_reviewed_by_fkey"
+      columns: ["reviewed_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"exercise_families": {
+                  Row: {
+                    "id": string,"name": string,"slug": string
+                  }
+                  Insert: {
+                    "id"?: string,"name": string,"slug": string
+                  }
+                  Update: {
+                    "id"?: string,"name"?: string,"slug"?: string
+                  }
+                  Relationships: [
+
+                  ]
                 },"exercise_instructions": {
                   Row: {
                     "exercise_id": string,"locale": string,"source_revision": string | null,"steps": (string)[],"text": string
@@ -109,6 +153,37 @@ isOneToOne: false
       columns: ["exercise_id"]
 isOneToOne: false
       referencedRelation: "exercises"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"exercise_muscle_mappings": {
+                  Row: {
+                    "id": string,"muscle_group_id": string | null,"muscle_id": string | null,"revision_id": string,"role": string
+                  }
+                  Insert: {
+                    "id"?: string,"muscle_group_id"?: string | null,"muscle_id"?: string | null,"revision_id": string,"role": string
+                  }
+                  Update: {
+                    "id"?: string,"muscle_group_id"?: string | null,"muscle_id"?: string | null,"revision_id"?: string,"role"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "exercise_muscle_mappings_muscle_group_id_fkey"
+      columns: ["muscle_group_id"]
+isOneToOne: false
+      referencedRelation: "muscle_groups"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "exercise_muscle_mappings_muscle_id_fkey"
+      columns: ["muscle_id"]
+isOneToOne: false
+      referencedRelation: "muscles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "exercise_muscle_mappings_revision_id_fkey"
+      columns: ["revision_id"]
+isOneToOne: false
+      referencedRelation: "exercise_analysis_revisions"
       referencedColumns: ["id"]
     }
                   ]
@@ -164,13 +239,13 @@ isOneToOne: false
                   ]
                 },"logged_sets": {
                   Row: {
-                    "completed": boolean,"id": string,"load_kg": number | null,"position": number,"reps": number | null,"rir": number | null,"workout_exercise_id": string
+                    "completed": boolean,"id": string,"load_convention": Database["public"]['Enums']["load_convention"],"load_kg": number | null,"load_reference": string | null,"position": number,"reps": number | null,"rir": number | null,"workout_exercise_id": string
                   }
                   Insert: {
-                    "completed"?: boolean,"id"?: string,"load_kg"?: number | null,"position": number,"reps"?: number | null,"rir"?: number | null,"workout_exercise_id": string
+                    "completed"?: boolean,"id"?: string,"load_convention"?: Database["public"]['Enums']["load_convention"],"load_kg"?: number | null,"load_reference"?: string | null,"position": number,"reps"?: number | null,"rir"?: number | null,"workout_exercise_id": string
                   }
                   Update: {
-                    "completed"?: boolean,"id"?: string,"load_kg"?: number | null,"position"?: number,"reps"?: number | null,"rir"?: number | null,"workout_exercise_id"?: string
+                    "completed"?: boolean,"id"?: string,"load_convention"?: Database["public"]['Enums']["load_convention"],"load_kg"?: number | null,"load_reference"?: string | null,"position"?: number,"reps"?: number | null,"rir"?: number | null,"workout_exercise_id"?: string
                   }
                   Relationships: [
                     {
@@ -200,15 +275,66 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"prescribed_sets": {
+                },"muscle_group_members": {
                   Row: {
-                    "id": string,"load_kg": number | null,"notes": string,"position": number,"prescription_id": string,"reps_max": number | null,"reps_min": number | null,"rest_seconds": number | null,"rir": number | null
+                    "muscle_group_id": string,"muscle_id": string
                   }
                   Insert: {
-                    "id"?: string,"load_kg"?: number | null,"notes"?: string,"position": number,"prescription_id": string,"reps_max"?: number | null,"reps_min"?: number | null,"rest_seconds"?: number | null,"rir"?: number | null
+                    "muscle_group_id": string,"muscle_id": string
                   }
                   Update: {
-                    "id"?: string,"load_kg"?: number | null,"notes"?: string,"position"?: number,"prescription_id"?: string,"reps_max"?: number | null,"reps_min"?: number | null,"rest_seconds"?: number | null,"rir"?: number | null
+                    "muscle_group_id"?: string,"muscle_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "muscle_group_members_muscle_group_id_fkey"
+      columns: ["muscle_group_id"]
+isOneToOne: false
+      referencedRelation: "muscle_groups"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "muscle_group_members_muscle_id_fkey"
+      columns: ["muscle_id"]
+isOneToOne: false
+      referencedRelation: "muscles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"muscle_groups": {
+                  Row: {
+                    "id": string,"name": string,"slug": string
+                  }
+                  Insert: {
+                    "id"?: string,"name": string,"slug": string
+                  }
+                  Update: {
+                    "id"?: string,"name"?: string,"slug"?: string
+                  }
+                  Relationships: [
+
+                  ]
+                },"muscles": {
+                  Row: {
+                    "id": string,"name": string,"slug": string
+                  }
+                  Insert: {
+                    "id"?: string,"name": string,"slug": string
+                  }
+                  Update: {
+                    "id"?: string,"name"?: string,"slug"?: string
+                  }
+                  Relationships: [
+
+                  ]
+                },"prescribed_sets": {
+                  Row: {
+                    "id": string,"load_convention": Database["public"]['Enums']["load_convention"],"load_kg": number | null,"load_reference": string | null,"notes": string,"position": number,"prescription_id": string,"reps_max": number | null,"reps_min": number | null,"rest_seconds": number | null,"rir": number | null
+                  }
+                  Insert: {
+                    "id"?: string,"load_convention"?: Database["public"]['Enums']["load_convention"],"load_kg"?: number | null,"load_reference"?: string | null,"notes"?: string,"position": number,"prescription_id": string,"reps_max"?: number | null,"reps_min"?: number | null,"rest_seconds"?: number | null,"rir"?: number | null
+                  }
+                  Update: {
+                    "id"?: string,"load_convention"?: Database["public"]['Enums']["load_convention"],"load_kg"?: number | null,"load_reference"?: string | null,"notes"?: string,"position"?: number,"prescription_id"?: string,"reps_max"?: number | null,"reps_min"?: number | null,"rest_seconds"?: number | null,"rir"?: number | null
                   }
                   Relationships: [
                     {
@@ -341,13 +467,13 @@ isOneToOne: false
                   ]
                 },"proposed_exercises": {
                   Row: {
-                    "block_id": string,"display_name": string,"exercise_id": string | null,"id": string,"notes": string,"position": number,"proposal_id": string,"targets": NonNullable<Json>
+                    "analysis_snapshot": Json | null,"block_id": string,"display_name": string,"exercise_id": string | null,"id": string,"notes": string,"position": number,"proposal_id": string,"targets": NonNullable<Json>
                   }
                   Insert: {
-                    "block_id": string,"display_name": string,"exercise_id"?: string | null,"id"?: string,"notes"?: string,"position": number,"proposal_id": string,"targets": NonNullable<Json>
+                    "analysis_snapshot"?: Json | null,"block_id": string,"display_name": string,"exercise_id"?: string | null,"id"?: string,"notes"?: string,"position": number,"proposal_id": string,"targets": NonNullable<Json>
                   }
                   Update: {
-                    "block_id"?: string,"display_name"?: string,"exercise_id"?: string | null,"id"?: string,"notes"?: string,"position"?: number,"proposal_id"?: string,"targets"?: NonNullable<Json>
+                    "analysis_snapshot"?: Json | null,"block_id"?: string,"display_name"?: string,"exercise_id"?: string | null,"id"?: string,"notes"?: string,"position"?: number,"proposal_id"?: string,"targets"?: NonNullable<Json>
                   }
                   Relationships: [
                     {
@@ -454,13 +580,13 @@ isOneToOne: false
                   ]
                 },"workout_exercises": {
                   Row: {
-                    "applied_snapshot": NonNullable<Json>,"block_id": string,"exercise_id": string | null,"id": string,"performed_name": string,"position": number,"workout_id": string
+                    "actual_analysis_snapshot": Json | null,"applied_snapshot": NonNullable<Json>,"block_id": string,"exercise_id": string | null,"id": string,"performed_name": string,"position": number,"workout_id": string
                   }
                   Insert: {
-                    "applied_snapshot": NonNullable<Json>,"block_id": string,"exercise_id"?: string | null,"id"?: string,"performed_name": string,"position": number,"workout_id": string
+                    "actual_analysis_snapshot"?: Json | null,"applied_snapshot": NonNullable<Json>,"block_id": string,"exercise_id"?: string | null,"id"?: string,"performed_name": string,"position": number,"workout_id": string
                   }
                   Update: {
-                    "applied_snapshot"?: NonNullable<Json>,"block_id"?: string,"exercise_id"?: string | null,"id"?: string,"performed_name"?: string,"position"?: number,"workout_id"?: string
+                    "actual_analysis_snapshot"?: Json | null,"applied_snapshot"?: NonNullable<Json>,"block_id"?: string,"exercise_id"?: string | null,"id"?: string,"performed_name"?: string,"position"?: number,"workout_id"?: string
                   }
                   Relationships: [
                     {
@@ -583,7 +709,8 @@ isOneToOne: true
       } },
 "add_workout_exercise":
 { Args: { "display_name": string,"exercise_id": string,"workout_id": string }; Returns: {
-              "applied_snapshot": NonNullable<Json>,
+              "actual_analysis_snapshot": Json | null,
+"applied_snapshot": NonNullable<Json>,
 "block_id": string,
 "exercise_id": string | null,
 "id": string,
@@ -618,6 +745,23 @@ isOneToOne: true
 "reject_proposal":
 { Args: { "proposal_id": string }; Returns: undefined
                            },
+"revise_exercise_analysis":
+{ Args: { "exercise_id": string,"family_id"?: string,"mappings": Json,"provenance": string,"reviewed_by"?: string,"source_reference": string }; Returns: {
+              "created_at": string,
+"exercise_id": string,
+"family_id": string | null,
+"id": string,
+"provenance": string,
+"reviewed_by": string | null,
+"revision": number,
+"source_reference": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "exercise_analysis_revisions"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "save_workout":
 { Args: { "complete"?: boolean,"exercises": Json,"feedback"?: Json,"workout_id": string }; Returns: {
               "adaptation_reason": string | null,
@@ -658,7 +802,7 @@ isOneToOne: true
       } }
           }
           Enums: {
-            [_ in never]: never
+            "load_convention": "unknown"|"total_external"|"per_dumbbell"|"added_bodyweight"|"assistance"|"machine_display"|"bodyweight"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -774,7 +918,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-
+            "load_convention": ["unknown", "total_external", "per_dumbbell", "added_bodyweight", "assistance", "machine_display", "bodyweight"]
           }
         }
 } as const
