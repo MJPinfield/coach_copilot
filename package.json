@@ -17,12 +17,15 @@
     "backend:status": "node tooling/supabase.mjs status",
     "backend:reset": "node tooling/supabase.mjs db reset --local",
     "backend:seed": "node tooling/seed-backend.mjs",
+    "client:seed": "node tooling/seed-client.mjs",
     "backend:types": "node tooling/generate-db-types.mjs",
     "catalogue:import": "node tooling/import-exercises.mjs",
     "test:db": "node tooling/supabase.mjs test db",
     "test:backend": "node --test --test-concurrency=1 tests/backend/*.test.mjs",
     "check:backend": "npm run backend:reset && node tooling/supabase.mjs db lint --local --level error && npm run test:db && npm run test:backend && node tooling/generate-db-types.mjs --check",
     "dev": "vite --config tooling/vite.config.ts --host 127.0.0.1",
+    "dev:client": "node tooling/client-local.mjs",
+    "test:client": "node tooling/client-local.mjs test",
     "typecheck": "tsc --noEmit",
     "build": "vite build --config tooling/vite.config.ts",
     "preview": "vite preview --config tooling/vite.config.ts --host 127.0.0.1",
@@ -56,6 +59,7 @@
     "storybook": "10.6.1",
     "supabase": "2.119.0",
     "typescript": "^7.0.2",
-    "vite": "^8.3.2"
+    "vite": "^8.3.2",
+    "vite-plugin-pwa": "^2.0.0"
   }
 }

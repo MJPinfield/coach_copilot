@@ -17,6 +17,17 @@ jobs:
       - run: npm ci
       - run: npm run backend:start
       - run: npm run check:backend
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run test:client
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: client-workout-failure-evidence
+          path: |
+            .artifacts/playwright-report/
+            .artifacts/client-test-results/
+          include-hidden-files: true
+          retention-days: 14
       - if: always()
         run: npm run backend:stop
   browser-integration:

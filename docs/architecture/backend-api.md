@@ -1,8 +1,8 @@
 # Backend API and initial rules
 
-Implemented locally on **2026-10-04** using a fresh Supabase model. This is a backend
-foundation; the current design UI still uses its synthetic API. No hosted deployment
-or live AI model is connected.
+Implemented locally on **2026-10-04** using a fresh Supabase model. The client workout
+journey now uses Auth, published-programme reads and the transactional workout APIs.
+No hosted deployment or live AI model is connected.
 
 See [domain permissions and verification](domain-security.md) for the complete
 31-table actor/operation matrix and executable security coverage.
@@ -182,10 +182,10 @@ The catalogue import has separately been exercised twice against all 1,324 real 
 to check ID stability, and sample real thumbnail/GIF URLs were fetched successfully.
 CI uses a small test catalogue and needs no external dataset/media service.
 
-Browser tests still exercise the design UI, not a live authenticated UI. Real model
+`npm run test:client` exercises the connected UI against real local Auth/PostgREST,
+including saving, reloads, partial completion and offline recovery. Real model
 behaviour, production email deliverability and a hosted deployment are not established
-by these tests. Connect the UI to `src/backend/client.ts` next, then add those browser
-journeys against this backend.
+by these tests.
 
 ## Exercise analysis extension
 

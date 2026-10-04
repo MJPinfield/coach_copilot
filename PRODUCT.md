@@ -32,9 +32,10 @@ criteria remain open.
 - Coaching spans programme authoring, client training, recorded performance and
   coach review. Desktop is useful for coaching but is not its only supported context.
 - **Offline training is required**, confirmed by Max on 2026-10-04: clients must be
-  able to continue logging without gym signal and sync later. This is a requirement,
-  not a capability of the current prototype. Initial offline preparation, conflict
-  resolution, cross-device recovery and offline media availability remain undecided.
+  able to continue logging without gym signal and sync later. The first connected
+  slice supports device-saved edits and production offline reloads of downloaded
+  workouts with a usable auth session. Conflict resolution, cross-device recovery,
+  expired-session recovery and offline media availability remain open.
 - Training terminology includes programmes, weeks, sessions, exercises, sets,
   prescribed versus actual load/repetitions, and RIR (repetitions in reserve).
 - Which existing tools this replaces, scheduling semantics and the smallest
@@ -65,13 +66,16 @@ Confirmed direction and initial rules:
 
 Current implementation boundaries:
 
-- The current design slice uses a synthetic local HTTP API. The initial Mantine
-  mockups were discarded after review; their findings are retained in
-  `docs/product/mockups-review-2026-10-04.md`.
+- The client UI now connects to Supabase: login, home, published workout selection,
+  flexible exercise/block navigation, actual-set logging, resume and completion.
+  The component gallery remains synthetic and in-memory.
 - A separate local Supabase backend implements authentication, access rules,
   transactional workout/adaptation APIs and the imported exercise catalogue.
-- The design UI is not connected to authenticated Supabase, no live AI model is
-  connected, and offline workout logging/sync is not implemented.
+- Device-scoped drafts retain edits through reloads and failed requests. A production
+  service worker supports offline reload of downloaded workouts with a usable auth
+  session; uploads resume when the workout page reconnects. Background sync,
+  expired-session recovery and concurrent-device conflicts remain open.
+- No live AI model is connected or hosted deployment established.
 
 Remaining decisions include release scope, programme progression, combined-session
 accounting, completed-workout corrections, retention after coaching ends, exercise

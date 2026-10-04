@@ -1,102 +1,97 @@
 # Coach Copilot
 
-A local-first **design and testing foundation**, rebuilt with React, TypeScript,
-TanStack Router, TanStack Query and Vite. Product scope is still being discussed in
-[the product workspace](docs/README.md).
+Client training UI built with default Mantine, TanStack Router and Query, and a
+real Supabase backend: **sign in → client home → choose a workout → log and save**.
+Clients can switch exercises around busy equipment while retaining their results.
+Supersets preserve A1 → A2 → rest → repeat.
 
-**Supabase is implemented as a separate local backend** for authentication, Postgres,
-RLS and transactional APIs. See [backend setup and testing](supabase/README.md).
-The local API below is a synthetic fixture for fast design and browser testing.
+## Run the client journey locally
 
-For the real backend: `npm run backend:start`, then `npm run check:backend`.
-Use `npm run backend:seed` for fictional accounts and `npm run catalogue:import`
-for the real exercise library and Gym Visual image/GIF references. No hosted account
-is required. The design UI has not yet been connected to this authenticated backend.
-
-## Start designing
-
-Requires Node.js 24+ and npm.
+Requires Node.js 24+, npm and the local container runtime used by Supabase.
 
 ```sh
 npm ci
-npm run dev
+npm run backend:start
+npm run client:seed
+npm run dev:client
 ```
 
-Open http://localhost:5173 in any browser. The local API seeds a fictional client
-and programme automatically. Edit the programme as coach, then open **Client view**
-to see the result. No account, credentials or external service is needed.
+Open http://127.0.0.1:5173. `client:seed` creates the fictional
+`training@example.test` account, prints its local-only password, and supplies two
+demo sessions. It is repeatable and does not reset existing workouts. Demonstration
+movements have no guessed exercise-catalogue identity.
 
-The **Design scenario** selector exposes populated, empty, slow, read-error and
-save-error states. Errors fail once so you can exercise retry. **Reset demo**
-restores fixtures and rearms errors. Draft fields survive failed saves; saved data
-survives reloads and navigation until the server restarts or the demo is reset.
-Browser profiles get isolated workspaces; tabs in the same profile share data.
+`dev:client` discovers local Supabase and passes **only its public URL/key** to Vite.
+For a separately configured backend, set `VITE_SUPABASE_URL` and
+`VITE_SUPABASE_PUBLISHABLE_KEY` in your ignored local environment, then use
+`npm run dev`. A missing connection displays setup guidance on the login page.
+
+Clients are invitation-only. Coach roles and programme authoring are backend
+capabilities; this first connected UI focuses on the client workout journey.
+See [backend setup](supabase/README.md) and [API contracts](docs/architecture/backend-api.md).
+
+## Saved and offline workouts
+
+- Start a workout while connected. Supabase snapshots the programme and creates
+  actual-set records transactionally.
+- Edits are written to a user/workout-scoped device journal immediately, then
+  uploaded through `save_workout`. Blank actuals remain unknown, not zero.
+- Switch exercises, leave and resume, or reload without losing device-saved entries.
+  Failed saves have an explicit retry. Reopening a dirty workout resumes syncing.
+- The **production build** precaches its application shell. After the initial
+  connected load, an already-downloaded workout can be reopened and edited offline
+  while the existing authentication session remains usable. Reconnect with its page
+  open to sync. New sessions and sign-in require connectivity.
+- Service workers are disabled in Vite development. Use the production preview
+  built by `npm run test:client`, then `npm run preview`, for offline reloads.
+- Clearing browser storage removes unsynced local entries. Device storage failures
+  are surfaced; the UI does not claim those edits are device-saved. Background sync
+  after closing the app, expired-session offline recovery, concurrent-device draft
+  conflict resolution and offline exercise media remain follow-up work.
+
+Finishing asks for confirmation. Unchecked sets stay incomplete; finishing does
+not imply all targets were met. Completed workouts are read-only.
+
+## Verify
+
+```sh
+npx playwright install chromium firefox webkit
+npm run check             # TypeScript, build, signed-out route checks
+npm run test:client       # Real Auth/DB journey, builds with local public config
+npm run test:components   # Domain gallery, interactions and accessibility
+```
+
+The connected tests cover login/error/empty states, equipment-driven switching,
+Supabase results, reload/resume, partial completion, failed-save retry, accessibility
+and responsive overflow across Chromium, Firefox and mobile WebKit. Chromium also
+tests full offline navigation/reload using the production service worker.
+
+`npm run check:backend` resets the local database and checks schema, security, APIs
+and generated types. After a reset, rerun `client:seed`; use `catalogue:import` to
+restore the licensed real exercise catalogue. CI runs both backend and UI checks.
 
 ## Domain component library
 
 ```sh
-npm run components:dev
-# http://127.0.0.1:5174/test-components.html
-npm run storybook
-# http://localhost:6006
+npm run components:dev # http://127.0.0.1:5174/test-components.html
+npm run storybook      # http://localhost:6006
 ```
 
-Reusable Mantine components cover coach prescriptions, client set logging, supersets,
-programmes, accounts, guidance, feedback, conversations and adaptations. Load conventions,
-versioned anatomy/family classifications and custom-exercise reviews follow migration 006. The gallery
-uses fictional training records and real catalogue guidance/media references; actions
-run in memory. See [component contracts and coverage](docs/architecture/component-library.md).
+The component gallery remains an in-memory engineering catalogue with fictional
+records. See [component contracts](docs/architecture/component-library.md) and
+[client journey decisions](docs/product/client-workout-journey.md).
 
-`npm run test:components` builds the gallery and checks interactions, accessibility
-and mobile layout in Chromium, Firefox and WebKit. `npm run storybook:build` builds
-the isolated examples. Outputs are under `.artifacts/`.
+## Layout
 
-## Verify in real browsers
+- `src/app/`: application shell, routes and Query client.
+- `src/features/client/`: authenticated pages, workout editor and Supabase boundary.
+- `src/components/`: controlled reusable Mantine domain components.
+- `src/backend/`: typed client factory and generated database types.
+- `tooling/`: Vite, component/Storybook configuration and local scripts.
+- `tests/`: browser runner configuration, real client journeys and backend checks.
+- `supabase/`: schema migrations, RLS, transactional APIs and database tests.
+- `docs/`: product decisions, architecture and historical records.
 
-```sh
-npx playwright install chromium firefox webkit
-npm run check
-```
-
-`check` runs TypeScript, a production build, and the browser integration suite
-against the built app and local HTTP API. Chromium, Firefox and mobile WebKit run
-the same journeys. Tests have isolated workspaces and need no running dev server.
-
-For the short feedback loop:
-
-```sh
-npm run test:browser:quick  # Chromium against the dev server
-npm run test:ui            # interactive browser runner against the dev server
-npm run test:headed       # watch Chromium run
-npm run test:report       # inspect the last report and failure traces
-```
-
-Playwright owns port 4173; development uses 5173. CI runs `check` and retains the
-HTML report, screenshots and traces on failure.
-
-## Where to work
-
-- `src/main.tsx`: application entry point and providers.
-- `src/app/router.tsx`: typed routes and application shell.
-- `src/app/styles.css`: responsive design tokens and UI styling; Vite updates instantly.
-- `src/features/programme/`: coach/client UI, HTTP boundary and prototype data types.
-- `src/backend/`: typed Supabase client factory and generated database/API types.
-- `public/`: static assets served at the site root.
-- `tooling/`: Vite configuration, synthetic local API and backend development scripts.
-- `tests/playwright*.ts`: browser runner configuration.
-- `tests/browser/`: acceptance journeys through the real browser and HTTP API.
-- `supabase/`: fresh migrations, local Auth configuration, database tests and Edge Functions.
-- `docs/product/`: brief, user stories, open questions and research.
-- `docs/architecture/`: domain/data models and [technical foundation](docs/architecture/technical-foundation.md).
-- `docs/history/`: historical technical records.
-
-Build output, browser reports and failure traces live under the ignored `.artifacts/`
-directory. The root retains npm manifests, the TypeScript project config, Vite's HTML
-entry point and repository-level instructions. Use the npm scripts above so relocated
-tool configurations are loaded automatically.
-
-This is a synthetic prototype, not a production coaching service. It has no
-authentication or durable database. `npm run preview` serves the built prototype
-with the same local API; serving `.artifacts/dist/` alone requires a future `/api` backend and
-SPA fallback. The previous app is available in Git history at `8e5b952` and in the
-original checkout. It is no longer the application entry point on this branch.
+Generated builds, test reports and screenshots live under ignored `.artifacts/`.
+The previous synthetic programme slice remains in source/history but is no longer
+the application entry point. No hosted deployment or live AI integration is implied.

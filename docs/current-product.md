@@ -4,7 +4,24 @@ This is an **as-is map**, not the target specification. The current prototype an
 historical application are described separately below. Neither inventory establishes
 what is deployed at the live URL.
 
-## Current rebuilt prototype
+## Current connected client journey
+
+The default Mantine UI now connects to real local Supabase Auth and workout APIs:
+login → client home → published workout selection → saved workout. Clients switch
+blocks and rounds around equipment availability, log actual values separately from
+targets, resume drafts and finish partially performed workouts explicitly.
+
+Device journals retain edits before upload and through failed requests. Production
+builds cache the app shell for offline reload of a downloaded workout with a usable
+auth session. Reconnection with the workout page open syncs pending entries.
+Background sync, concurrent-device conflicts and expired-session offline access are
+not implemented. See [client journey](product/client-workout-journey.md) and the root
+README for setup, verification and exact boundaries.
+
+AI, coach authoring screens and invitation/password setup screens are not part of
+this connected slice. The independent component gallery remains in-memory.
+
+## Earlier synthetic rebuild (historical)
 
 The foundation merged in `313ecf3` provides a synthetic coach/client design slice:
 the coach edits a fictional programme's title and notes, saves through the local

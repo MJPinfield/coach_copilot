@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from './database.types'
 
-// Created by authenticated UI features when they replace the synthetic prototype.
+// Used by the authenticated client workout journey.
 // Only a public/publishable key belongs here; never a service-role key.
 export function createBackendClient(
   url: string = import.meta.env.VITE_SUPABASE_URL,
