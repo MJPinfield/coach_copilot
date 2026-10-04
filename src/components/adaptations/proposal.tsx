@@ -11,8 +11,8 @@ export function AdaptationProposal({ reason, original, proposed, sources, status
     <Group justify="space-between"><Title order={3}>Workout adaptation</Title><Badge variant="default">{status}</Badge></Group>
     <Text>{reason}</Text><SourceReferences sources={sources} />
     <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="xl">
-      <Stack><Text fw={700}>Original prescription</Text><SessionContent value={original} mode="prescribe" /></Stack>
-      <Stack><Text fw={700}>Proposed instructions</Text><SessionContent value={proposed} mode="prescribe" /></Stack>
+      <Stack><Text fw={700}>Original prescription</Text><SessionContent value={original} mode="prescribe" analysisContext="original" /></Stack>
+      <Stack><Text fw={700}>Proposed instructions</Text><SessionContent value={proposed} mode="prescribe" analysisContext={status === 'applied' ? 'applied' : 'proposed'} /></Stack>
     </SimpleGrid>
     {status === 'stale' ? <Alert title="Programme changed">Request a new proposal before applying changes.</Alert> : <Text size="sm">Applies to this workout only. Your coach’s programme is not rewritten.</Text>}
     {status === 'proposed' && <Group>

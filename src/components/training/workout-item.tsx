@@ -1,10 +1,12 @@
 import { Accordion, Badge, Group, Stack, Text, Textarea, Title } from '@mantine/core'
 import { ExerciseGuidance } from '../catalogue/exercise-guidance'
 import { LoggedSetEditor, LoggedSetSummary, PrescribedSetEditor } from './sets'
-import type { ExerciseItem, TrainingMode } from './model'
+import type { AnalysisContext, ExerciseItem, TrainingMode } from './model'
+import { ExerciseClassification } from '../catalogue/analysis'
 
-export function WorkoutItem({ value, mode, onChange, superset = false, marker }: {
+export function WorkoutItem({ value, mode, onChange, superset = false, marker, analysisContext = mode === 'prescribe' ? 'current' : 'actual' }: {
   value: ExerciseItem; mode: TrainingMode; onChange?: (value: ExerciseItem) => void; superset?: boolean; marker?: string
+  analysisContext?: AnalysisContext
 }) {
   return <Stack gap="md" component="article" aria-label={`${marker ? `${marker} ` : ''}${value.display_name}`}>
     <Group justify="space-between" align="start">
@@ -18,8 +20,15 @@ export function WorkoutItem({ value, mode, onChange, superset = false, marker }:
       : value.coach_notes && <Text size="sm">Coach’s cue: {value.coach_notes}</Text>}
     <Accordion variant="default">
       <Accordion.Item value="guidance"><Accordion.Control>Exercise guidance</Accordion.Control><Accordion.Panel>
-        <ExerciseGuidance exercise={value.exercise} coachNotes={value.coach_notes} />
+        <ExerciseGuidance exercise={value.exercise} coachNotes={value.coach_notes} showClassification={analysisContext === 'current'} />
       </Accordion.Panel></Accordion.Item>
+      {analysisContext !== 'current' && <Accordion.Item value="classification"><Accordion.Control>Recorded exercise classification</Accordion.Control><Accordion.Panel>
+        {mode === 'review' ? <Stack>
+          <ExerciseClassification title="Original classification" value={value.original_analysis_snapshot} />
+          <ExerciseClassification title="Applied classification" value={value.applied_analysis_snapshot} />
+          <ExerciseClassification title="Actual classification" value={value.actual_analysis_snapshot} />
+        </Stack> : <ExerciseClassification title={`${analysisContext[0].toUpperCase()}${analysisContext.slice(1)} classification`} value={value[`${analysisContext === 'proposed' ? 'applied' : analysisContext}_analysis_snapshot`]} />}
+      </Accordion.Panel></Accordion.Item>}
     </Accordion>
     {mode === 'prescribe' ? value.targets.map(target => <PrescribedSetEditor key={target.id} value={target} showRest={!superset}
       onChange={onChange ? next => onChange({ ...value, targets: value.targets.map(item => item.id === next.id ? next : item) }) : undefined} />)

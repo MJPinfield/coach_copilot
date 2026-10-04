@@ -51,8 +51,9 @@ save/sync and AI states are demonstrations, not implemented persistence or AI ex
 | --- | --- |
 | `profiles`, `coach_clients`, Auth | Profile identity, relationship actions, invitation and sign-in forms |
 | `exercises`, `exercise_instructions`, `exercise_media` | Catalogue picker and exercise guidance, attribution/unmatched/unavailable states |
+| `muscle_groups`, `muscles`, `muscle_group_members`, `exercise_families`, `exercise_analysis_revisions`, `exercise_muscle_mappings` | Evidence-level classification, recorded memberships/family, owning-coach revision form and historical comparison |
 | `programmes`, `programme_weeks`, `sessions`, `session_blocks` | Programme tree, session composition, publication state and single/superset blocks |
-| `exercise_prescriptions`, `prescribed_sets` | Workout item, target summary and prescribed set editor |
+| `exercise_prescriptions`, `prescribed_sets` | Workout item, target summary and prescribed set editor with load convention/reference |
 | `conversations`, `messages` | Private conversation and message composer |
 | `adaptation_proposals`, `proposal_sessions`, `proposed_blocks`, `proposed_exercises`, `proposal_exercise_sources` | Proposal comparison, source references, apply/reject states |
 | `workouts`, `workout_sources`, `workout_blocks`, `workout_exercises`, `workout_exercise_sources`, `logged_sets` | Workout summary, source references, workout blocks and logged set editor |
@@ -67,7 +68,7 @@ persistence and future offline synchronization. UI visibility is not authorizati
 ## Run and integrate
 
 - `npm run components:dev`: http://127.0.0.1:5174/test-components.html.
-- `npm run storybook`: http://localhost:6006, with 18 isolated/composed examples.
+- `npm run storybook`: http://localhost:6006, with 20 isolated/composed examples.
 - `npm run test:components`: production-gallery browser checks on port 4174.
 - `npm run storybook:build`: static Storybook under `.artifacts/storybook/`.
 - `npm run components:build`: gallery under `.artifacts/components/`.
@@ -93,10 +94,10 @@ so failed sends retain text and only successful sends clear it.
 
 ## Verification and boundaries · 2026-10-04
 
-- 30 component browser checks passed (10 scenarios across three browser/device projects).
+- 39 component browser checks passed (13 scenarios across three browser/device projects).
 - No WCAG A/AA axe violations in the rendered gallery on those projects.
 - Desktop and 390px mobile rendering inspected; no horizontal overflow.
-- All 18 built Storybook examples rendered without page errors.
+- Built Storybook includes 20 examples, including taxonomy review and classification history.
 - Existing 21 browser checks, TypeScript and both builds passed.
 
 The baseline is ready for screen composition. Examples do not authenticate, write
@@ -108,5 +109,45 @@ when connecting routes, queries, AI streaming and reload-safe offline synchroniz
 The catalogue picker demonstrates two real movements from the pinned upstream
 dataset, with licence attribution and opt-in playback. Production catalogue search,
 media hosting and offline media caching belong to the data/persistence integration.
-Exercise-analysis taxonomy added independently in migration 006 is not yet exposed
-as authoring UI in this baseline.
+
+## Reconciled with migration 006 (`06d0d99`)
+
+`SetTarget` and `SetActual` require generated `load_convention` and `load_reference`
+fields. `LoadEditor` supports all seven backend conventions. Editing repetitions,
+completion or another field retains those semantics in the callback. Blank actuals
+start as `unknown` even with a known target convention; no equipment-based inference.
+Machine references are optional and clear when leaving machine display. Selecting
+bodyweight clears a nonzero external load to null and prevents positive external load.
+Body mass, doubled dumbbell loads and effective resistance are never inferred.
+The save container must resend these fields: `save_workout` replaces logged sets and
+omitted fields reset to unknown/null. Legacy target snapshots require explicit
+unknown/null defaults when constructing the typed view shape.
+
+Catalogue classification uses the current joined revision shape derived from generated
+rows. Raw source target labels remain labelled as source data, not reviewed anatomy.
+`ExerciseClassification` distinguishes group-level evidence from specific muscles,
+shows provenance/revision and recorded memberships, and never expands groups into
+claims about member muscles or equates exercises within a family.
+
+Exercise-item history receives three separate JSONB snapshots: original from
+`workouts.original_snapshot`, applied from `workout_exercises.applied_snapshot`,
+and actual from `workout_exercises.actual_analysis_snapshot`. For proposals, use the
+stored `proposed_exercises.analysis_snapshot` in the proposed/applied view field.
+The renderer validates the persisted shape at the JSON boundary. Null is unclassified;
+an unreadable snapshot is unavailable. Neither falls back to today's catalogue.
+Review displays original/applied/actual independently; proposal comparison and client
+logging use their specified snapshot context.
+
+`AnalysisReviewForm` uses Mantine form/list validation and emits the generated
+`revise_exercise_analysis` command shape with `coach_reviewed` provenance. Mount it
+only for an owning coach's custom exercise; backend authorization remains decisive.
+Taxonomy is supplied read-only, with one muscle or group per mapping; duplicate
+targets are rejected. Empty mappings and omitted family intentionally clear the
+classification via the RPC's null family default. Review source is required;
+reviewer identity comes from Auth, never a browser-supplied identity. Failed saves
+retain the draft. Key the form by exercise/revision when changing records.
+
+New browser scenarios verify convention retention through superset edits, machine
+context and bodyweight constraints, historical revision separation, group-vs-muscle
+evidence and atomic review payloads. Classification examples use fictional revisions
+and do not claim the real catalogue has been coach-reviewed.

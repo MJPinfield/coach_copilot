@@ -1,10 +1,12 @@
 import { Anchor, Container, Divider, Group, Stack, Text, Title } from '@mantine/core'
 import type { ReactNode } from 'react'
-import { AccountExamples, BlockExample, CatalogueExamples, ConversationExample, ItemExample, ProgrammeExample, ProposalExample, SessionExample, SetExamples, StateExamples, WorkoutExamples } from './examples'
+import { AccountExamples, AnalysisExamples, BlockExample, CatalogueExamples, ClassificationHistoryExample, ConversationExample, ItemExample, ProgrammeExample, ProposalExample, SessionExample, SetExamples, StateExamples, WorkoutExamples } from './examples'
 
 const sections: { id: string; title: string; content: ReactNode }[] = [
   { id: 'accounts', title: 'Accounts and coaching', content: <AccountExamples /> },
   { id: 'catalogue', title: 'Exercise catalogue and guidance', content: <CatalogueExamples /> },
+  { id: 'analysis', title: 'Exercise anatomy, families and review', content: <AnalysisExamples /> },
+  { id: 'classification-history', title: 'Classification history: original, applied and actual', content: <ClassificationHistoryExample /> },
   { id: 'sets', title: 'Sets: prescription and performance', content: <SetExamples /> },
   { id: 'exercise', title: 'Exercise item', content: <ItemExample /> },
   { id: 'superset', title: 'Superset: coach, client and review', content: <BlockExample /> },

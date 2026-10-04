@@ -10,6 +10,8 @@ import { FeedbackForm } from '../components/workouts/feedback'
 import { ContentState, SaveStatus, WorkoutSummary, type SyncState } from '../components/workouts/status'
 import { TrainingConversation } from '../components/conversations/conversation'
 import { AdaptationProposal } from '../components/adaptations/proposal'
+import { ExerciseClassification } from '../components/catalogue/analysis'
+import { AnalysisReviewForm } from '../components/catalogue/analysis-review'
 import type { Row, TrainingMode } from '../components/training/model'
 import * as fixtures from './fixtures'
 
@@ -41,6 +43,33 @@ export function CatalogueExamples() {
     <Switch label="Demonstration unavailable example" checked={unavailable} onChange={e => setUnavailable(e.currentTarget.checked)} />
     <ExerciseGuidance key={`${id}-${unavailable}`} exercise={exercise && unavailable ? { ...exercise, media: [] } : exercise} coachNotes="Your coach’s cue stays separate from catalogue guidance." />
   </Stack>
+}
+
+export function AnalysisExamples() {
+  const [result, setResult] = useState('')
+  const [fail, setFail] = useState(false)
+  const [error, setError] = useState<string>()
+  return <Stack gap="lg">
+    <Text>Fictional classifications demonstrate evidence levels and immutable history; no review is written to the catalogue.</Text>
+    <SimpleGrid cols={{ base: 1, md: 2 }}>
+      <ExerciseClassification title="Imported classification example" value={fixtures.importedAnalysis} />
+      <ExerciseClassification title="Reviewed classification example" value={fixtures.reviewedAnalysis} />
+      <ExerciseClassification title="Unclassified historical example" value={null} />
+      <ExerciseClassification title="Explicitly cleared classification" value={{ ...fixtures.reviewedAnalysis, family_id: null, family: null, mappings: [] }} />
+    </SimpleGrid>
+    <Title order={3}>Review a custom exercise</Title>
+    <Switch label="Simulate classification save failure" checked={fail} onChange={e => setFail(e.currentTarget.checked)} />
+    <AnalysisReviewForm exerciseId="demo-owned-custom-exercise" initialValue={null} groups={[fixtures.chest]} muscles={[fixtures.pectoralis]} families={[fixtures.benchFamily]}
+      error={error} onSubmit={command => {
+        if (fail) setError('Example server error.')
+        else { setError(undefined); setResult(JSON.stringify(command, null, 2)) }
+      }} />
+    {result && <><Text role="status">Revision command captured in this demo.</Text><Code block>{result}</Code></>}
+  </Stack>
+}
+
+export function ClassificationHistoryExample() {
+  return <WorkoutItem value={fixtures.pair.exercises[0]} mode="review" />
 }
 
 export function SetExamples() {

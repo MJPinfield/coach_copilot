@@ -42,7 +42,8 @@ npm run storybook
 ```
 
 Reusable Mantine components cover coach prescriptions, client set logging, supersets,
-programmes, accounts, guidance, feedback, conversations and adaptations. The gallery
+programmes, accounts, guidance, feedback, conversations and adaptations. Load conventions,
+versioned anatomy/family classifications and custom-exercise reviews follow migration 006. The gallery
 uses fictional training records and real catalogue guidance/media references; actions
 run in memory. See [component contracts and coverage](docs/architecture/component-library.md).
 

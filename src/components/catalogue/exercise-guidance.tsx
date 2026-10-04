@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Alert, Button, Group, Image, List, Select, Stack, Text, Title } from '@mantine/core'
 import type { CatalogueExercise } from '../training/model'
+import { ExerciseClassification } from './analysis'
 
 function Demonstration({ url, name, attribution }: { url: string; name: string; attribution: string }) {
   const [state, setState] = useState<'still' | 'playing' | 'failed'>('still')
@@ -15,13 +16,14 @@ function Demonstration({ url, name, attribution }: { url: string; name: string; 
   </Stack>
 }
 
-export function ExerciseGuidance({ exercise, coachNotes = '' }: { exercise: CatalogueExercise | null; coachNotes?: string }) {
+export function ExerciseGuidance({ exercise, coachNotes = '', showClassification = true }: { exercise: CatalogueExercise | null; coachNotes?: string; showClassification?: boolean }) {
   const [locale, setLocale] = useState('en')
   if (!exercise) return <Alert title="Exercise not linked">This movement has not been matched to the catalogue. Follow your coach’s instructions; no demonstration is assumed.</Alert>
   const instruction = exercise.instructions.find(item => item.locale === locale)
   const media = exercise.media.find(item => item.kind === 'animation' && item.asset_url)
   return <Stack gap="md">
-    <div><Title order={4}>{exercise.name}</Title><Text size="sm">{exercise.equipment ?? 'Equipment unspecified'} · {exercise.target ?? 'Target unspecified'}</Text></div>
+    <div><Title order={4}>{exercise.name}</Title><Text size="sm">{exercise.equipment ?? 'Equipment unspecified'} · Source target label: {exercise.target ?? 'unspecified'}</Text></div>
+    {showClassification && <ExerciseClassification value={exercise.analysis} />}
     {exercise.instructions.length > 1 && <Select label="Instruction language" data={exercise.instructions.map(item => item.locale)} value={locale} onChange={next => setLocale(next ?? 'en')} />}
     {media?.asset_url ? <Demonstration key={media.asset_url} url={media.asset_url} name={exercise.name} attribution={media.attribution} /> : <Text size="sm">No demonstration available for this exercise.</Text>}
     {instruction ? instruction.steps.length ? <List type="ordered" spacing="xs">{instruction.steps.map((step, index) => <List.Item key={index}>{step}</List.Item>)}</List> : <Text>{instruction.text}</Text>

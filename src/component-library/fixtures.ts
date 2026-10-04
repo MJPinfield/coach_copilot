@@ -1,12 +1,30 @@
-import type { CatalogueExercise, ExerciseItem, Programme, Session, SetTarget, SourceReference, TrainingBlock } from '../components/training/model'
+import type { CatalogueExercise, ExerciseAnalysis, ExerciseItem, Programme, Session, SetTarget, SourceReference, TrainingBlock } from '../components/training/model'
 import type { Feedback } from '../components/workouts/feedback'
 
 // Fictional training records. Movement metadata/instructions/media references are
 // from the pinned MIT exercises-dataset; Gym Visual licence confirmed by Max.
 // https://github.com/hasaneyldrm/exercises-dataset/tree/7455efae41b330c265e7cd4b78dfa848e7ce5ebd
 const mediaBase = 'https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/7455efae41b330c265e7cd4b78dfa848e7ce5ebd/'
+export const chest = { id: 'group-chest', slug: 'chest', name: 'Chest' }
+export const pectoralis = { id: 'muscle-pectoralis', slug: 'pectoralis_major', name: 'Pectoralis major' }
+export const benchFamily = { id: 'family-bench', slug: 'bench_press', name: 'Bench press' }
+// Fictional revision IDs/history demonstrate the backend shape, not clinical claims.
+export const importedAnalysis: ExerciseAnalysis = {
+  id: 'analysis-imported', exercise_id: 'catalogue-0025', revision: 1,
+  family_id: benchFamily.id, family: benchFamily, provenance: 'imported', reviewed_by: null,
+  source_reference: 'Demo import of pinned dataset target: pectorals (group-level mapping)', created_at: '2026-10-04T08:00:00Z',
+  mappings: [{ id: 'mapping-chest', revision_id: 'analysis-imported', muscle_group_id: chest.id, muscle_id: null,
+    role: 'primary', muscle_group: chest, muscle: null, groups: [] }],
+}
+export const reviewedAnalysis: ExerciseAnalysis = {
+  ...importedAnalysis, id: 'analysis-reviewed', revision: 2, provenance: 'coach_reviewed', reviewed_by: 'demo-coach',
+  source_reference: 'Fictional coach review for component demonstration',
+  mappings: [{ id: 'mapping-pectoralis', revision_id: 'analysis-reviewed', muscle_group_id: null, muscle_id: pectoralis.id,
+    role: 'primary', muscle_group: null, muscle: pectoralis, groups: [chest] }],
+}
 export const bench: CatalogueExercise = {
   id: 'catalogue-0025', name: 'Barbell bench press', equipment: 'barbell', target: 'pectorals',
+  analysis: reviewedAnalysis,
   instructions: [{ locale: 'en', text: '', steps: [
     'Lie flat on a bench with your feet flat on the ground and your back pressed against the bench.',
     'Grasp the barbell with an overhand grip slightly wider than shoulder-width apart.',
@@ -20,6 +38,7 @@ export const bench: CatalogueExercise = {
 }
 export const row: CatalogueExercise = {
   id: 'catalogue-0027', name: 'Barbell bent over row', equipment: 'barbell', target: 'upper back',
+  analysis: null,
   instructions: [{ locale: 'en', text: '', steps: [
     'Stand with your feet shoulder-width apart and knees slightly bent.',
     'Bend forward at the hips while keeping your back straight and chest up.',
@@ -30,12 +49,15 @@ export const row: CatalogueExercise = {
   ] }],
   media: [{ id: 'media-0027', kind: 'animation', asset_url: `${mediaBase}videos/0027-eZyBC3j.gif`, attribution: '© Gym visual — https://gymvisual.com/' }],
 }
-export const target: SetTarget = { id: 'target-1', position: 1, load_kg: 60, reps_min: 6, reps_max: 8, rir: 2, rest_seconds: 90, notes: '' }
+export const target: SetTarget = { id: 'target-1', position: 1, load_kg: 60, load_convention: 'total_external', load_reference: null, reps_min: 6, reps_max: 8, rir: 2, rest_seconds: 90, notes: '' }
 export function exerciseItem(exercise: CatalogueExercise, position: number): ExerciseItem {
   return { id: `prescription-${exercise.id}`, position, exercise_id: exercise.id, display_name: exercise.name, exercise,
+    original_analysis_snapshot: exercise.id === bench.id ? importedAnalysis : null,
+    applied_analysis_snapshot: exercise.id === bench.id ? importedAnalysis : null,
+    actual_analysis_snapshot: exercise.analysis,
     coach_notes: position === 1 ? 'Pause briefly at the bottom.' : 'Keep your torso still.',
     targets: [1, 2].map(round => ({ ...target, id: `${exercise.id}-target-${round}`, position: round, load_kg: position === 1 ? 60 : 40 })),
-    actuals: [1, 2].map(round => ({ id: `${exercise.id}-actual-${round}`, position: round, load_kg: null, reps: null, rir: null, completed: false })),
+    actuals: [1, 2].map(round => ({ id: `${exercise.id}-actual-${round}`, position: round, load_kg: null, load_convention: 'unknown', load_reference: null, reps: null, rir: null, completed: false })),
   }
 }
 export const pair: TrainingBlock = { id: 'block-a', position: 1, kind: 'superset', label: 'A', rest_after_round_seconds: 90,
