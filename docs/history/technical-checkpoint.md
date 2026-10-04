@@ -1,7 +1,7 @@
 # Technical checkpoint
 
 **Historical note:** this describes the original checkout before the TanStack
-rebuild. Use [the technical foundation](technical-foundation.md) and root README
+rebuild. Use [the technical foundation](../architecture/technical-foundation.md) and root README
 for current commands and coverage.
 
 Technical work was paused in favour of product discovery. The working tree contains

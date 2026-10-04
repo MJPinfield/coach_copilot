@@ -91,9 +91,15 @@ copies if Mark's workflow supports that; live-linked templates should earn their
 
 These are recommendations to discuss, not agreed exclusions:
 
+**Update · 2026-10-04:** Max has now supplied a concrete AI use case: workout analysis
+and conversational adaptation of his programme, including combining days and taking
+it easier when ill. This is requested product direction in US-16–19, not part of the
+defer list. It does not by itself establish a need for autonomous long-term programming.
+
 - Payments, subscriptions and bookings.
 - Nutrition, habits and meal logging.
-- AI programme generation or autonomous progression.
+- Autonomous full-programme generation or long-term progression without an agreed
+  coaching workflow; distinguish these from the requested chat-assisted adaptations.
 - Full chat replacement, extensive notifications and video-review tooling.
 - Wearables, social feeds, gamification, team management and elaborate analytics.
 

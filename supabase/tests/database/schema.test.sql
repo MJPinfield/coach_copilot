@@ -1,0 +1,12 @@
+begin;
+create extension if not exists pgtap with schema extensions;
+select plan(7);
+select is((select count(*)::integer from pg_tables where schemaname = 'public' and not rowsecurity), 0, 'Every public domain table has RLS');
+select ok(not has_table_privilege('anon', 'public.programmes', 'SELECT'), 'Anonymous API cannot read programmes');
+select ok(not has_table_privilege('authenticated', 'public.workouts', 'INSERT'), 'Workout writes require atomic commands');
+select ok(not has_column_privilege('authenticated', 'public.profiles', 'role', 'UPDATE'), 'Clients cannot promote roles');
+select ok(not has_function_privilege('anon', 'public.start_workout(uuid,uuid[],uuid,jsonb)', 'EXECUTE'), 'Anonymous cannot start workouts');
+select ok(not has_function_privilege('authenticated', 'private.session_snapshot(uuid)', 'EXECUTE'), 'Snapshot helper cannot leak other client data');
+select ok(has_function_privilege('authenticated', 'public.save_workout(uuid,jsonb,jsonb,boolean)', 'EXECUTE'), 'Authenticated clients can invoke the guarded save command');
+select * from finish();
+rollback;

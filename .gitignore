@@ -2,6 +2,11 @@ node_modules/
 dist/
 playwright-report/
 test-results/
+.cache/
+coverage/
+*.tsbuildinfo
+supabase/.temp/
+supabase/.branches/
 .env*
 !.env.example
 .DS_Store

@@ -4,9 +4,14 @@ A local-first **design and testing foundation**, rebuilt with React, TypeScript,
 TanStack Router, TanStack Query and Vite. Product scope is still being discussed in
 [the product workspace](docs/README.md).
 
-**Supabase remains the backend choice** for authentication, Postgres and Edge
-Functions. See [the retained backend and integration plan](supabase/README.md).
+**Supabase is implemented as a separate local backend** for authentication, Postgres,
+RLS and transactional APIs. See [backend setup and testing](supabase/README.md).
 The local API below is a synthetic fixture for fast design and browser testing.
+
+For the real backend: `npm run backend:start`, then `npm run check:backend`.
+Use `npm run backend:seed` for fictional accounts and `npm run catalogue:import`
+for the real exercise library and Gym Visual image/GIF references. No hosted account
+is required. The design UI has not yet been connected to this authenticated backend.
 
 ## Start designing
 
@@ -52,13 +57,18 @@ HTML report, screenshots and traces on failure.
 
 ## Where to work
 
-- `src/router.tsx`: typed routes and application shell.
-- `src/programme.tsx`: the coach editor and client view, with Query reads/mutations.
-- `src/styles.css`: responsive design tokens and UI styling; Vite updates instantly.
-- `src/api.ts`, `src/model.ts`: HTTP boundary and shared prototype data types.
+- `src/main.tsx`: application entry point and providers.
+- `src/app/router.tsx`: typed routes and application shell.
+- `src/app/styles.css`: responsive design tokens and UI styling; Vite updates instantly.
+- `src/features/programme/`: coach/client UI, HTTP boundary and prototype data types.
+- `src/backend/`: typed Supabase client factory and generated database/API types.
+- `public/`: static assets served at the site root.
 - `dev/local-api.ts`: synthetic API, fixtures, scenarios and reset behavior.
 - `tests/browser/`: acceptance journeys through the real browser and HTTP API.
-- [Technical foundation](docs/technical-foundation.md): decisions and boundaries.
+- `supabase/`: fresh migrations, local Auth configuration, database tests and Edge Functions.
+- `docs/product/`: brief, user stories, open questions and research.
+- `docs/architecture/`: domain/data models and [technical foundation](docs/architecture/technical-foundation.md).
+- `docs/history/`: historical technical records.
 
 This is a synthetic prototype, not a production coaching service. It has no
 authentication or durable database. `npm run preview` serves the built prototype

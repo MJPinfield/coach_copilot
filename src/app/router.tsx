@@ -1,7 +1,7 @@
 import { createRootRoute, createRoute, createRouter, Link, Outlet } from '@tanstack/react-router'
 import { useMutation } from '@tanstack/react-query'
-import { resetDemo, scenario } from './api'
-import { ProgrammePage } from './programme'
+import { resetDemo, scenario } from '../features/programme/api'
+import { ProgrammePage } from '../features/programme/programme'
 
 function Shell() {
   const reset = useMutation({

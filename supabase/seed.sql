@@ -1,0 +1,4 @@
+-- Auth accounts and isolated integration-test records are created through the
+-- local API by scripts/seed-backend.mjs, not by writing internal Auth tables.
+-- Run npm run catalogue:import after reset to populate the real exercise dataset,
+-- multilingual instructions and licensed Gym Visual image/GIF URLs.

@@ -1,0 +1,63 @@
+project_id = "coach_copilot"
+
+[api]
+enabled = true
+port = 55421
+schemas = ["public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+auto_expose_new_tables = false
+
+[db]
+port = 55422
+shadow_port = 55420
+major_version = 17
+health_timeout = "3m"
+
+[db.migrations]
+enabled = true
+schema_paths = []
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[studio]
+enabled = false
+
+[realtime]
+enabled = false
+
+[storage]
+enabled = false
+
+[analytics]
+enabled = false
+
+[local_smtp]
+enabled = true
+port = 55424
+
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:5173"
+additional_redirect_urls = ["http://127.0.0.1:5173/auth/callback", "http://127.0.0.1:4173/auth/callback"]
+enable_signup = false
+minimum_password_length = 10
+
+[auth.email]
+# Enables the email provider; public signups remain disabled by auth.enable_signup.
+enable_signup = true
+enable_confirmations = true
+
+[auth.rate_limit]
+email_sent = 100
+sign_in_sign_ups = 100
+
+[edge_runtime]
+enabled = true
+policy = "per_worker"
+
+[functions.invite-client]
+# The handler validates the caller with Auth, including asymmetric signing keys.
+verify_jwt = false

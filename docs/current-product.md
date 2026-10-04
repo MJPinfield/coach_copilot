@@ -12,19 +12,29 @@ HTTP API, and the client view displays the result. Saved fixture data survives
 navigation and reload within a workspace, but not a server restart or demo reset.
 
 Design controls expose populated, empty, slow, read-error and save-error scenarios.
-The prototype has no authentication or durable database. Supabase remains the
-backend choice, but the old workout, onboarding and programme-builder journeys
-below have not been reimplemented by this foundation.
+The design UI has no authentication or durable database connection. A separate
+[fresh Supabase backend](architecture/backend-api.md) now implements authentication,
+the domain schema, RLS and transactional workout/adaptation commands. The old UI
+journeys below have not been reimplemented in the frontend.
+
+AI workout analysis and conversational adaptation were requested by Max on
+2026-10-04 and are captured in [US-16–19](product/user-stories.md#us-16--analyse-my-training-through-a-context-aware-conversation).
+They are product direction, not implemented prototype capabilities.
+
+Visual exercise guidance and dataset-linked exercise identities were also requested
+on 2026-10-04. See US-20–21 and the [proposed data model](architecture/data-model.md); the current
+prototype still has name/prescription strings. The separate backend now contains the
+real dataset and attributed image/GIF references, ready for frontend integration.
 
 The merge verification passed typechecking, a production build and 21 browser
 checks across Chromium, Firefox and mobile WebKit. These exercise the built
 prototype and its local HTTP API, not the historical intercepted-Supabase suite.
-See [technical foundation](technical-foundation.md) for current commands and scope.
+See [technical foundation](architecture/technical-foundation.md) for current commands and scope.
 
 ## Historical inventory: pre-rebuild application
 
 The remaining inventory records the original frontend at revision `8e5b952`, plus
-the small working-tree fixes described in the [historical technical checkpoint](technical-checkpoint.md).
+the small working-tree fixes described in the [historical technical checkpoint](history/technical-checkpoint.md).
 It is retained as discovery evidence, not a requirement to restore every old feature.
 Function references below refer to that historical frontend unless otherwise stated.
 
@@ -76,7 +86,7 @@ explicit frontend access block; real permissions depend on missing policies.
 Activation SQL can affect all the client's invited relationships. An older
 email-confirmation trigger also exists; its deployed status is unknown.
 
-**Evidence:** `loadClients`, `renderClients`; the three root SQL scripts.
+**Evidence:** `loadClients`, `renderClients`; the three historical SQL scripts at Git revision `8e5b952`.
 
 ### Create and revise a prescription
 
@@ -182,5 +192,5 @@ browser scenarios run across Chromium, Firefox and mobile-emulated WebKit.
 These do **not** prove email delivery, SQL behavior, real persistence, RLS, actual
 device behavior, service-worker installation or offline recovery. The failure/retry
 test concerns programme creation, not workout completion. See
-[historical technical checkpoint](technical-checkpoint.md) for that record and its
-evidence limits. Use [technical foundation](technical-foundation.md) for current tests.
+[historical technical checkpoint](history/technical-checkpoint.md) for that record and its
+evidence limits. Use [technical foundation](architecture/technical-foundation.md) for current tests.

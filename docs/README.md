@@ -6,20 +6,30 @@ approved specification or a commitment to reproduce the current app.
 
 ## Start here
 
-1. [Product brief](product-brief.md) — the problem, people and outcomes.
+1. [Product brief](product/product-brief.md) — the problem, people and outcomes.
 2. [Product inventory](current-product.md) — the current prototype and historical app inventory.
-3. [Domain model](domain-model.md) — shared language and lifecycle questions from the historical app.
-4. [Draft user stories](user-stories.md) — outcomes and proposed acceptance scenarios.
-5. [Open questions](open-questions.md) — decisions needed before choosing scope.
-6. [Comparable products](product-research.md) — official-source research and proposed directions.
-7. [Technical foundation](technical-foundation.md) — the current rebuild and browser workflow.
+3. [Domain model](architecture/domain-model.md) — shared language and lifecycle questions from the historical app.
+4. [Proposed data model](architecture/data-model.md) — exercise-library entities, dataset mapping and training references.
+5. [Draft user stories](product/user-stories.md) — outcomes and proposed acceptance scenarios.
+6. [Open questions](product/open-questions.md) — decisions needed before choosing scope.
+7. [Comparable products](product/product-research.md) — official-source research and proposed directions.
+8. [Technical foundation](architecture/technical-foundation.md) — the current rebuild and browser workflow.
+9. [Backend API](architecture/backend-api.md) — fresh schema, Auth, RLS, transactional commands and local verification.
 
-[Story template](story-template.md) · [Historical technical checkpoint](technical-checkpoint.md)
+[Story template](product/story-template.md) · [Historical technical checkpoint](history/technical-checkpoint.md)
 
 The inventory, draft stories and product research were recovered from the
 pre-rebuild workspace. Story IDs are preserved so existing questions and discussion
 references resolve. Historical evidence is not proof of capability in the current
 prototype; agree scope and verify stories against the rebuilt app as work progresses.
+
+Max's subsequent request for AI workout analysis and conversational session adaptation
+is captured in **US-16–19**, with open details in **Q-15–18** and text-only chat confirmed
+in **Q-19**. This is confirmed product
+direction; the stories' acceptance details and release scope remain Draft.
+
+Visual exercise guidance and the selected dataset integration are captured in
+**US-20–21**, with the proposed data model and open details in **Q-20–21**.
 
 ## How we will work
 

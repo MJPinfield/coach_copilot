@@ -1,5 +1,5 @@
 import type { Connect, Plugin } from 'vite'
-import type { Programme } from '../src/model.ts'
+import type { Programme } from '../src/features/programme/model.ts'
 
 const seed: Programme = {
   id: 'strength-foundations',

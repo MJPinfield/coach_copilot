@@ -15,9 +15,9 @@ requirement; the current product guidance does not establish either requirement.
 
 The old monolithic frontend and service worker are removed from this branch.
 **Supabase remains the backend choice**, as explicitly confirmed by Max. The
-existing SQL patches remain at the root; the invitation Edge Function is retained
+incomplete historical SQL patches have been removed; the invitation Edge Function is retained
 at `supabase/functions/invite-client/index.ts`, including the original checkout's
-relationship-check fix. See [backend integration](../supabase/README.md).
+relationship-check fix. See [backend integration](../../supabase/README.md).
 Historical frontend source remains in Git. The prior technical checkpoint
 and domain inventory describe that historical app, not the rebuilt prototype.
 
@@ -52,6 +52,8 @@ cross-browser checks passed against the built app, and all seven Chromium checks
 passed against the dev server. The desktop prototype was also inspected in a
 browser. The GitHub Actions workflow has not yet been run on the hosted branch.
 
-Supabase authentication, authorization, database persistence, training logging,
-offline behavior and deployment remain future work requiring agreed product scope.
-These synthetic tests establish the prototype's behavior, not those guarantees.
+The [fresh backend](backend-api.md) now provides Supabase authentication, RLS,
+database persistence and workout commands with real integration tests. Wiring this
+design UI to that API, offline behaviour and hosted deployment remain future work.
+The synthetic browser suite establishes prototype behaviour; the separate backend
+suite validates the database/Auth/API foundation.

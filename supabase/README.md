@@ -1,37 +1,83 @@
 # Supabase backend
 
-Supabase remains the chosen backend: Auth, Postgres with RLS, and Edge Functions.
-The TanStack rebuild changes the frontend foundation, not this preference.
+Fresh schema, Supabase Auth, PostgREST table APIs, transactional RPCs and an invitation
+Edge Function. This backend is independent of Mark's old database. Nothing here has
+been deployed to his project.
 
-## Retained source
+## Local development
 
-- `functions/invite-client/index.ts`: existing invitation handler, copied from the
-  original working tree including its coach/client relationship check on resend.
-- Root `v3.3-activate-invited-client.sql`, `v3.3.5-activate-client-rpc.sql`, and
-  `v3.4.2-onboarding-status.sql`: existing incremental SQL patches.
+Requires Node.js 24+, npm and a running Docker-compatible runtime. The project wrapper
+uses Docker when available, or the socket of the selected running Podman machine.
+It does not change the selected machine or stop other projects.
 
-These patches are not a full migration baseline: the repository does not contain
-the table definitions, complete policies, constraints, or all auth triggers.
-The React prototype currently calls only the synthetic `/api` fixture. It does
-not yet connect to Supabase or exercise this Edge Function.
+```sh
+npm ci
+npm run backend:start
+npm run backend:reset
+npm run backend:seed
+npm run catalogue:import
+```
 
-## Next integration step
+- API/Auth/functions: `http://127.0.0.1:55421`
+- Postgres: `127.0.0.1:55422`
+- Captured invitation/recovery emails (Mailpit): `http://127.0.0.1:55424`
+- `npm run backend:status`: local URLs and keys.
+- `npm run backend:stop`: stop this stack, retaining its database volume.
 
-Obtain the reviewed backend baseline from the existing Supabase project. With the
-project owner's access and Docker available, the Supabase CLI workflow is:
+`backend:reset` destroys **this local database**, reapplies migrations and its SQL seed.
+Run `backend:seed` and `catalogue:import` afterwards to repopulate local accounts and
+the real exercise library. Seeds/imports refuse a non-local API URL.
 
-1. `npx supabase init` to create local configuration.
-2. `npx supabase login`, then `npx supabase link --project-ref <project-ref>`.
-3. `npx supabase db pull` to capture the remote schema. Review application-specific
-   auth/storage policies and triggers too; those schemas are excluded by default.
-4. Add synthetic seed data, then `npx supabase start` and `npx supabase db reset
-   --local` to verify the migration chain on a disposable local instance.
-5. Generate database types; wire `src/api.ts` to the Supabase SDK and real auth.
-6. Run browser journeys against local Supabase for auth, cross-role access,
-   persistence and retry behavior, alongside the fast synthetic design suite.
+Seed accounts: `coach@example.test`, `client@example.test`, `othercoach@example.test`,
+`otherclient@example.test`. Development-only password: `Local-training-only-2026!`.
+These are Auth users, not mocked sessions. They must not be provisioned in production.
 
-Do not treat the fixture's `Programme` shape as a database schema. Map the agreed
-product slice to the reviewed existing tables. Keep service-role credentials in
-Edge Functions; the browser uses the public project key and authenticated session.
+## Real exercise catalogue
 
-Official guide: https://supabase.com/docs/guides/local-development/overview
+`catalogue:import` loads the pinned 1,324-exercise dataset, multilingual instructions
+and real image/GIF URLs. Stable IDs survive repeat imports. Gym Visual attribution is
+retained; Max confirmed the app has the required licence on 2026-10-04. The importer
+records that confirmation as the rights reference. Assets currently resolve to the
+pinned upstream revision; production hosting and offline availability remain separate
+decisions. No binary media collection is committed to this repository.
+
+The small synthetic exercise used by integration tests is separate from that real
+catalogue. CI does not depend on fetching 1,324 exercises or external media.
+
+## Verification
+
+```sh
+npm run backend:start
+npm run check:backend
+npm run check
+```
+
+`check:backend` resets the local database, lints SQL routines, runs pgTAP privilege/schema checks and real
+HTTP integration tests, then checks generated TypeScript types for schema drift. The
+tests seed isolated fictional accounts and exercise Auth, PostgREST, RPCs, Edge Functions
+and Mailpit, including invitation redemption and password setup. Resetting removes any
+locally imported catalogue; import it again after a clean test cycle if needed.
+
+`check` retains the existing typecheck/build/browser suite against the synthetic UI.
+The UI will connect to this authenticated API in the next phase. GitHub Actions runs
+both jobs independently; the backend job needs no hosted Supabase account or secrets.
+
+## Files and API contract
+
+- `config.toml`: local services, invite-only Auth and local redirect URLs.
+- `migrations/`: fresh database definition, RLS and transactional commands.
+- `tests/database/`: pgTAP schema/privilege tests.
+- `functions/invite-client/`: coach-authenticated invitation and resend endpoint.
+- `../tests/backend/`: authenticated HTTP and integration scenarios.
+- `../src/backend/database.types.ts`: generated types; use `npm run backend:types` after migrations.
+- `../src/backend/client.ts`: typed public-key SDK factory for future UI features.
+- [Backend API and decisions](../docs/architecture/backend-api.md): roles, tables, commands and limitations.
+
+Copy `.env.example` to `.env.local` and fill the local publishable key when connecting
+UI features. Service-role keys stay in trusted scripts/functions, never `VITE_*` variables.
+The Edge Function uses a server-configured `APP_URL` for redirects (local default
+`http://127.0.0.1:5173`); configure this and Auth's matching redirect allowlist for deployment.
+
+The three incomplete legacy SQL patches remain in Git history only. The fresh migrations
+are now the source of truth. Future hosted deployment is a separate step, not part of
+the local commands above.

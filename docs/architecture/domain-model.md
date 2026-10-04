@@ -4,6 +4,11 @@ Status: **Draft vocabulary for discussion**, derived from the pre-rebuild app. T
 a conceptual product model, not a proposed database design or service architecture.
 Mark's coaching language should take precedence over implementation names.
 
+Requested exercise-library integration is detailed in the [proposed data model](data-model.md),
+including fields and references between catalogue entries, prescriptions, AI proposals
+and actual workout records. The [fresh backend](backend-api.md) now implements these
+structures; the design UI remains a synthetic prototype.
+
 ## Working capability areas
 
 | Area | Purpose | Working classification |
@@ -11,6 +16,7 @@ Mark's coaching language should take precedence over implementation names.
 | Training prescription | Express and communicate what a client should do | Core |
 | Training performance and review | Record what happened and inform the next coaching decision | Core |
 | Coaching relationships | Establish who is coaching whom and manage that relationship | Supporting |
+| Exercise library and guidance | Identify movements and explain them visually and in text | Supporting |
 | Account access | Sign-in, invitations and recovery | Generic |
 
 These are discussion boundaries, not a recommendation to split the application into services.
@@ -26,12 +32,19 @@ These are discussion boundaries, not a recommendation to split the application i
 | Programme week | An ordered block of prescribed sessions | It may not mean a Monday–Sunday calendar week |
 | Prescribed session | A planned training session within a programme | This is the plan, not evidence that training occurred |
 | Exercise prescription | A movement and the instructions for performing it in a session | An occurrence of an exercise is different from the identity of that exercise |
+| Library exercise | A stable movement identity with equipment and descriptive metadata | A display name or alias is not the identity; keep variants distinct |
+| Exercise instruction | General guidance for a library movement, optionally by language | Separate from Mark's specific cues and prescribed targets |
+| Exercise media | Demonstration/thumbnail associated with a library movement | May be absent; source reference, attribution and reuse rights are separate concerns |
 | Prescribed set | Targets or guidance for a set | A range, a fixed target and an optional target may have different meanings |
 | Workout / training attempt | One occasion when a client performs training | May differ from, partially fulfil, or repeat a prescribed session |
 | Logged set | What the client recorded for a set, including whether it was performed | Current `completed_sets` storage also contains unchecked sets |
 | Workout feedback | The client's report of context, experience or concerns | A default value is not necessarily an explicit report |
 | Adherence | An agreed comparison of intended and performed training | Must define the plan, period and what counts |
 | Personal record (PR) | A qualifying improvement against comparable previous performance | Requires agreed exercise identity, eligible sets and comparison rules |
+| Training conversation | A client's questions and requests, with relevant programme and workout context | Conversation is not a completed workout or an applied programme change |
+| Adaptation proposal | Suggested changes to one or more prescribed sessions for a stated reason | May be refined or discarded; application authority is undecided |
+| Applied adaptation | The agreed version of training instructions selected for an attempt | Preserve the distinction from the coach's original prescription and actual performance |
+| Readiness report | What the client reports before training, such as feeling ill or having limited energy | Current self-report is distinct from post-workout feedback and an inferred diagnosis |
 
 ## Conceptual relationships
 
@@ -46,19 +59,22 @@ Person/account ── participates in ── Coaching relationship ── with �
                                           │
                                   Prescribed session
                                           │
-                                Exercise prescription
+                                Exercise prescription ── references ── Library exercise
                                           │
                                     Prescribed set
 
 Client undertakes a Workout / training attempt
   ├── may refer to a Prescribed session
-  ├── contains Logged sets (which may refer to Prescribed sets)
+  ├── contains Performed exercise occurrences → Logged sets
+  │             └── reference actual Library exercise and source prescription
   └── carries Workout feedback
 
 Training history informs coach review and, where meaningful, adherence and PRs.
+Library exercise → General instructions + Demonstration media
+AI proposals reference the same library identities as prescriptions and performances.
 ```
 
-The current app always starts a workout from a prescribed session. Allowing an
+The historical app always starts a workout from a prescribed session. Allowing an
 unplanned workout is an open product question, not an existing capability.
 
 ## Lifecycles observed in source
@@ -113,15 +129,44 @@ deriving progress from the word “completed”. See Q-07 and Q-08.
 
 These are candidates to discuss through examples, not instructions to implement yet.
 
+## AI-assisted adaptation — requested direction, proposed model
+
+Max requested programme-aware AI analysis and chat on 2026-10-04, including combined
+sessions and easier training when feeling ill. The conceptual extension is:
+
+```text
+Prescription + workout history + relevant client context
+  → conversation → analysis and/or adaptation proposal
+  → refined, discarded or applied under the agreed change rules
+  → workout performed against the applied instructions
+  → actual results and permitted adaptation context available for review
+```
+
+Combining two prescribed sessions can yield one training attempt. This introduces
+an unresolved relationship between the attempt and its source sessions; it must not
+silently double-count actual work. A readiness conversation may instead lead to rest
+or postponement, without creating a completed workout.
+
+Keep the original prescription, proposed/applied instructions and logged performance
+distinct. Who may apply a change, its effect on future sessions and what chat context
+Mark sees are open product questions, not prescribed architecture. See
+[US-16–19](../product/user-stories.md#us-16--analyse-my-training-through-a-context-aware-conversation)
+and [Q-15–19](../product/open-questions.md#q-15--what-may-the-agent-change-and-who-decides).
+
 ## Evidence
+
+- [Exercise dataset and proposed mapping](data-model.md): inspected source, licence,
+  media references and model extensions requested by Max on 2026-10-04.
 
 - Historical `index.html` (Git revision `8e5b952`): `boot`, `loadTree`, `cur`, `parseQuickBuild`,
   `saveQuickDraft`, `startWorkout.onclick`, `finishWorkout.onclick`, `loadHistory`,
   `renderCoachSnapshot`, `renderClientSummary`, `findPRs`, `isHistoryPR`.
-- [Invitation Edge Function](../supabase/functions/invite-client/index.ts): invitation and relationship creation handler.
-- [Activation RPC](../v3.3.5-activate-client-rpc.sql),
-  [onboarding status RPC](../v3.4.2-onboarding-status.sql),
-  [older confirmation trigger](../v3.3-activate-invited-client.sql).
+- [Invitation Edge Function](../../supabase/functions/invite-client/index.ts): invitation and relationship creation handler.
+- Historical SQL at Git revision `8e5b952`: activation RPC
+  (`v3.3.5-activate-client-rpc.sql`), onboarding status RPC
+  (`v3.4.2-onboarding-status.sql`) and older confirmation trigger
+  (`v3.3-activate-invited-client.sql`). These incomplete patches were removed from
+  the working tree; they remain historical evidence, not a migration baseline.
 
 Missing schema and policies mean cardinality, deletion effects, retention and access
 guarantees cannot be inferred reliably from the frontend alone.
