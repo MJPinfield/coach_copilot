@@ -11,3 +11,10 @@
 - Start with Mantine's default theme; custom branding and theming come later.
 - Use Mantine UI examples as starting layouts, adapting them to coach desktop and
   client mobile workflows. Keep TanStack Router and Query for navigation and data.
+
+# Repository layout
+
+- Keep development scripts and Vite configuration in `tooling/`, and browser runner
+  configurations in `tests/`. Use npm scripts to load these relocated configs.
+- Put generated build/test output under the ignored `.artifacts/` directory.
+- Keep the root lean; place new files with the feature or tooling they belong to.

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { before, test } from 'node:test';
 import { randomUUID } from 'node:crypto';
-import { clients, seed, fixture as f, password, checked } from '../../scripts/seed-backend.mjs';
+import { clients, seed, fixture as f, password, checked } from '../../tooling/seed-backend.mjs';
 
 const { admin, anonymous } = clients();
 let actors, rows;

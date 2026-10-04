@@ -63,15 +63,21 @@ HTML report, screenshots and traces on failure.
 - `src/features/programme/`: coach/client UI, HTTP boundary and prototype data types.
 - `src/backend/`: typed Supabase client factory and generated database/API types.
 - `public/`: static assets served at the site root.
-- `dev/local-api.ts`: synthetic API, fixtures, scenarios and reset behavior.
+- `tooling/`: Vite configuration, synthetic local API and backend development scripts.
+- `tests/playwright*.ts`: browser runner configuration.
 - `tests/browser/`: acceptance journeys through the real browser and HTTP API.
 - `supabase/`: fresh migrations, local Auth configuration, database tests and Edge Functions.
 - `docs/product/`: brief, user stories, open questions and research.
 - `docs/architecture/`: domain/data models and [technical foundation](docs/architecture/technical-foundation.md).
 - `docs/history/`: historical technical records.
 
+Build output, browser reports and failure traces live under the ignored `.artifacts/`
+directory. The root retains npm manifests, the TypeScript project config, Vite's HTML
+entry point and repository-level instructions. Use the npm scripts above so relocated
+tool configurations are loaded automatically.
+
 This is a synthetic prototype, not a production coaching service. It has no
 authentication or durable database. `npm run preview` serves the built prototype
-with the same local API; serving `dist/` alone requires a future `/api` backend and
+with the same local API; serving `.artifacts/dist/` alone requires a future `/api` backend and
 SPA fallback. The previous app is available in Git history at `8e5b952` and in the
 original checkout. It is no longer the application entry point on this branch.

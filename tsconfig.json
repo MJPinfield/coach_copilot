@@ -12,5 +12,5 @@
     "esModuleInterop": true,
     "types": ["vite/client", "node"]
   },
-  "include": ["src", "dev", "vite.config.ts", "playwright*.ts", "tests"]
+  "include": ["src", "tooling", "tests"]
 }

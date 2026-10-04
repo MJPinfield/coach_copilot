@@ -1,7 +1,5 @@
 node_modules/
-dist/
-playwright-report/
-test-results/
+.artifacts/
 .cache/
 coverage/
 *.tsbuildinfo

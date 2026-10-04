@@ -43,7 +43,7 @@ Coach edits a fictional programme title and notes → saves over HTTP → client
 the result → reload retains the saved result. This is a technical proving slice,
 not agreement on programme publication, account roles or production behavior.
 
-`dev/local-api.ts` mounts a process-local synthetic API in Vite dev and preview.
+`tooling/local-api.ts` mounts a process-local synthetic API in Vite dev and preview.
 An opaque browser-local workspace ID isolates state so parallel tests do not race.
 The shared seed and visible scenario controls work in any browser, including
 Playwright; no browser interception, cloud credentials or external SDK is needed.
