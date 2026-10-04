@@ -21,6 +21,7 @@ Deno.serve(async (req) => {
   if (coach?.role !== 'coach') return reply(403, { error: 'Coach access required' });
   try {
     const body = await req.json();
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return reply(400, { error: 'An object is required' });
     // Redirect destination is server configuration, never caller-controlled.
     const redirectTo = `${Deno.env.get('APP_URL') || 'http://127.0.0.1:5173'}/auth/callback`;
     if (body.resend === true) {
@@ -38,15 +39,23 @@ Deno.serve(async (req) => {
     if (!name || name.length > 200 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return reply(400, { error: 'A name and valid email are required' });
     }
-    const { data, error } = await admin.auth.admin.inviteUserByEmail(email, { redirectTo, data: { display_name: name } });
-    if (error) return reply(400, { error: error.message });
+    // Reserve a new identity first. inviteUserByEmail can return an existing,
+    // unconfirmed user, so its response alone does not establish cleanup ownership.
+    const { data, error } = await admin.auth.admin.createUser({ email, email_confirm: false, user_metadata: { display_name: name } });
+    if (error) return reply(409, { error: 'Account already exists or cannot be invited; use resend for your pending invitation' });
     const { data: relationship, error: linkError } = await admin.from('coach_clients')
       .insert({ coach_id: user.id, client_id: data.user.id }).select('id').single();
     if (linkError) {
-      // This user was created by this attempt. Remove the orphan on link failure.
+      // Only this attempt's newly reserved identity is eligible for cleanup.
       const cleanup = await admin.auth.admin.deleteUser(data.user.id);
       if (cleanup.error) console.error('Invitation cleanup failed', cleanup.error.message);
       throw linkError;
+    }
+    const { error: sendError } = await admin.auth.admin.inviteUserByEmail(email, { redirectTo });
+    if (sendError) {
+      // Keep the established relationship so its coach can retry via resend.
+      console.error('Invitation delivery failed', sendError.message);
+      return reply(502, { error: 'Invitation created but email delivery failed; use resend', clientId: data.user.id, relationshipId: relationship.id });
     }
     return reply(201, { clientId: data.user.id, relationshipId: relationship.id });
   } catch (error) {

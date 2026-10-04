@@ -15,6 +15,7 @@ approved specification or a commitment to reproduce the current app.
 7. [Comparable products](product/product-research.md) — official-source research and proposed directions.
 8. [Technical foundation](architecture/technical-foundation.md) — the current rebuild and browser workflow.
 9. [Backend API](architecture/backend-api.md) — fresh schema, Auth, RLS, transactional commands and local verification.
+10. [Domain security](architecture/domain-security.md) — role/operation matrix, lifecycle rules and security test coverage.
 
 [Story template](product/story-template.md) · [Historical technical checkpoint](history/technical-checkpoint.md)
 

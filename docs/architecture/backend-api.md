@@ -4,6 +4,9 @@ Implemented locally on **2026-10-04** using a fresh Supabase model. This is a ba
 foundation; the current design UI still uses its synthetic API. No hosted deployment
 or live AI model is connected.
 
+See [domain permissions and verification](domain-security.md) for the complete
+22-table actor/operation matrix and executable security coverage.
+
 ## Confirmed decisions
 
 Max chose a fresh database and approved these initial rules:
@@ -27,7 +30,7 @@ Implementation conventions for this first slice:
   was achieved. Unchecked sets and missing values remain distinct from completed work/zero.
 - Deactivation blocks new client access to the programme and new starts. Clients keep
   access to their own workouts, including an already-started draft. The former coach
-  loses workout access; the coach retains their authored programme records.
+  loses workout and related-profile access; the coach retains their authored programme records as read-only.
 - Combining sessions is limited to one coaching relationship. Source links express
   provenance; they do not automatically credit two completed sessions for adherence.
 - Completed attempts are immutable to the public API. Corrections, reactivation,
@@ -71,10 +74,12 @@ There is no parallel custom REST server to maintain.
 - Public `signUp` is disabled. The profile trigger creates a client profile for an
   invited/admin-created auth user and ignores any supplied role metadata.
 - `functions.invoke('invite-client', { body: { name, email } })`: authenticated coach
-  invites a new client; returns `clientId` and `relationshipId`. Auth creates the user
-  and profile, then the function creates the invited relationship. It attempts cleanup
-  of a newly created auth user if that relationship write fails. Email delivery and
-  database writes are not one distributed transaction.
+  invites a new client; returns `clientId` and `relationshipId`. The function reserves
+  a new Auth identity, creates the invited relationship, then sends the invitation.
+  Duplicate/existing accounts return 409 without altering the original user. It
+  attempts cleanup only of its newly reserved identity if the relationship write
+  fails. Email delivery failure returns 502 with those IDs and retains the pending
+  relationship for scoped resend. Email and database writes are not one transaction.
 - Resend uses `{ resend: true, clientId }` and requires the caller's own pending
   relationship. Redirect destinations are server configuration, not caller input.
 - After invitation/password setup, `accept_invitation({ relationship_id })` activates

@@ -72,6 +72,8 @@ both jobs independently; the backend job needs no hosted Supabase account or sec
 - `../src/backend/database.types.ts`: generated types; use `npm run backend:types` after migrations.
 - `../src/backend/client.ts`: typed public-key SDK factory for future UI features.
 - [Backend API and decisions](../docs/architecture/backend-api.md): roles, tables, commands and limitations.
+- [Domain security matrix](../docs/architecture/domain-security.md): all 22 tables,
+  role-specific CRUD, lifecycle/deletion rules and executable security coverage.
 
 Copy `.env.example` to `.env.local` and fill the local publishable key when connecting
 UI features. Service-role keys stay in trusted scripts/functions, never `VITE_*` variables.
