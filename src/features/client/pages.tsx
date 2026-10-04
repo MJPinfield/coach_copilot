@@ -45,8 +45,7 @@ export function HomePage() {
         <Button color="blue.8" renderRoot={props => <Link {...props} to="/workouts/$workoutId" params={{ workoutId: workout.id }} />} size="md">Resume workout</Button>
       </Stack>
     </Paper>)}</Stack></section>}
-    <section><Title order={2} size="h3">Start a workout</Title><Text mt="xs" mb="md">Choose a session from your coach’s published programme.</Text>
-      <Button color="blue.8" component={Link} to="/workouts" variant={inProgress.length ? 'default' : 'filled'} size="md">Choose a workout</Button></section>
+    <SelectorPage embedded />
     <Divider />
     <section><Title order={2} size="h3" mb="md">Recent workouts</Title>
       {!finished.length && <Text>No finished workouts yet. Your recorded sessions will appear here.</Text>}
@@ -58,7 +57,7 @@ export function HomePage() {
   </Stack>
 }
 
-export function SelectorPage() {
+export function SelectorPage({ embedded = false }: { embedded?: boolean }) {
   const user = useClientId()
   const programmes = useQuery(programmesOptions(user))
   const navigate = useNavigate()
@@ -74,13 +73,13 @@ export function SelectorPage() {
     },
   })
   return <Stack gap="xl">
-    <div><Anchor c="blue.8" component={Link} to="/">Back to your training</Anchor><Title order={1} mt="md">Choose your workout</Title><Text mt="sm">Pick the session that works for you today. You can move between exercises as equipment becomes free.</Text></div>
+    {!embedded && <div><Anchor c="blue.8" component={Link} to="/">Back to your training</Anchor><Title order={1} mt="md">Choose your workout</Title></div>}
     {programmes.isPending && <ContentState state="loading" title="Loading your programme" message="Finding sessions shared by your coach." />}
     {programmes.isError && <ContentState state="error" title="Could not load your programme" message="Reconnect and try again. You can still resume a downloaded workout from your home page." onRetry={() => { void programmes.refetch() }} />}
     {programmes.data?.length === 0 && <ContentState state="empty" title="No programme shared yet" message="Your coach’s published sessions will appear here when they are ready." />}
     {start.isError && <Alert color="red" title="Workout could not start">Check your connection and retry. Retrying opens the same attempt.<Button display="block" mt="sm" variant="default" onClick={() => start.variables && start.mutate(start.variables)}>Retry start</Button></Alert>}
     {programmes.data?.map(programme => <section key={programme.id}>
-      <Title order={2}>{programme.name}</Title>{programme.goal && <Text mt="xs">{programme.goal}</Text>}
+      <Title order={2} size="h3">{programme.name}</Title>{programme.goal && <Text mt="xs">{programme.goal}</Text>}
       <Stack mt="lg" gap="xl">{[...programme.programme_weeks].sort((a, b) => a.position - b.position).map(week => <section key={week.id}>
         <Title order={3} size="h4" mb="sm">{week.name || `Week ${week.position}`}</Title>
         <Stack>{[...week.sessions].sort((a, b) => a.position - b.position).map(session => <Paper key={session.id} withBorder p="lg">

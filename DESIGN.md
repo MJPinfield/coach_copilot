@@ -68,9 +68,9 @@ using Mantine's `size` when a smaller visual hierarchy fits.
 
 The client shell has a 64px header and a centred `Container size="sm"` (720px maximum).
 Login uses a 420px container. Mantine padding and Stack spacing own the rhythm;
-there is no custom grid or breakpoint override. Actual load, reps and RIR use a
-three-column `SimpleGrid`. Exercise/block and round selectors remain accessible
-without requiring a prescribed performance order.
+there is no custom grid or breakpoint override. Actual load, reps and RIR sit in
+one compact row with a 44px completion control. All prescribed sets are visible in
+one scrolling log; exercise jump links avoid forced navigation through selectors.
 
 ## Elevation & Depth
 
@@ -86,11 +86,13 @@ border treatment. Do not create a parallel custom component theme.
 
 - **Authentication:** existing `AccountForm`, inside a bordered Paper; adapted from
   Mantine UI's authentication layout.
-- **Workout selection:** session name, notes, exercise summary and explicit Start
-  action; resume is the primary home action when an attempt is open.
-- **Logging:** selected round, target summary, actual inputs, explicit record/undo;
-  superset partners retain separate results with rest after the pair.
-- **Details:** Mantine Accordion for guidance and load interpretation.
+- **Workout selection:** sessions and their Start actions appear directly on home;
+  resume is the primary home action when an attempt is open.
+- **Logging:** every prescribed set, editable rep suggestion, target summary and
+  explicit record/undo; supersets scroll in A1 → A2 → rest order for every round.
+  Rep ranges suggest the lower bound. Untouched suggestions are not actual results.
+- **Details:** Mantine Accordion for guidance; Popover for per-set load details.
+- **Account:** header Menu holds sign out, outside the training log.
 - **Completion:** Mantine Modal because finishing makes the attempt immutable.
 - **State:** readable save text, inline recoverable errors and ordinary empty states.
 

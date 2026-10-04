@@ -16,13 +16,14 @@ bright gym use, blue actions, semantic feedback, standard controls and spacing.
 between exercises as equipment becomes free, and finish recording explicitly.
 Targets and performed results remain distinct; blank values never imply zero.
 
-**FIRST VIEWPORT:** Compact product navigation, workout title and save status,
-exercise selector with completion counts, current exercise and compact set controls.
-Guidance and detailed load interpretation are expandable. Superset rounds retain
-the paired exercise and rest instruction together.
+**FIRST VIEWPORT:** Compact product navigation with an Account menu, workout title,
+Finish action, save status, exercise jump links and the first compact set rows.
+All prescribed sets are visible in one scrolling log. Guidance and detailed load
+interpretation expand on demand. Supersets retain A1 → A2 → rest in each round.
 
 **FORM:** Operate; code-led extension of the established Mantine world. User-pinned
-login → home → selector → workout structure, with flexible exercise navigation.
+login → home → workout structure, with sessions directly on home and flexible
+exercise navigation. The dedicated selector URL remains available.
 
 **FINISH:** unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
@@ -61,7 +62,44 @@ conflicts and media caching remain open. The existing backend's completion API i
 immutable; an attempted draft save against a remotely closed workout retains local
 entries and reports failure rather than claiming they synced.
 
-## Finish review
+## Scrollable-flow revision · 2026-10-04
+
+Max rejected the selector-heavy flow and requested Strong/Hevy-style direct logging.
+The existing backend already owns ordered prescribed sets and target ranges; no
+domain/schema change is required for showing them together. Mantine Group,
+NumberInput, ActionIcon, Popover and Menu provide the interaction without custom
+navigation or control implementations.
+
+- Home exposes published sessions and their Start buttons directly.
+- All sets are on the page; exercise anchors replace block/round selection.
+- Rep inputs suggest the applied prescription's lower bound (or upper bound if
+  that is all the PT supplied). Ticking the set accepts that value; clients can
+  change it first. No added sets or prescription edits are implied.
+- Suggestions are presentation-only until the row is edited/recorded. Completing
+  the workout does not turn untouched suggestions into actuals. Explicit blanks
+  survive same-device reloads via an optional edited-set journal marker. Existing
+  actuals and completed history are never given defaults. Load conventions and
+  machine references still require explicit recording.
+- Supersets repeat A1, A2, rest for each round; normal sets retain their own rest.
+- Sign out lives in the header Account menu; Finish is available at both ends of
+  the workout. Set details preserve all load controls and target notes.
+
+**Review:** desktop (1440px) and mobile (390px) inspected together. The first batch
+found low-contrast subtle-button text and duplicate round landmark labels; corrected
+with Mantine's text-color prop and block-qualified labels. Mechanical detector: no
+findings. No shipping raster assets or custom theme were introduced.
+
+**Disposition: ship.** Final mobile/desktop confirmation is complete. `npm run check`
+passes typecheck/build and 9 signed-out checks; `npm run test:client` passes 10
+real-backend checks (2 existing non-Chromium offline skips). Coverage verifies
+scrollable set order, PT defaults, variations, explicit blanks after sync/reload,
+untouched actuals remaining null, offline recovery and completion. Axe reports no
+violations in completed workouts, home, or open set-details controls at either size.
+Edited-set markers use exercise ID plus position because `save_workout` replaces
+logged-set rows and their IDs. This is same-device suggestion state, not a new
+backend fact; cross-device blank-versus-untouched intent remains outside this slice.
+
+## Original connected-slice finish review (superseded layout)
 
 **disposition: ship** — first connected slice, single-context review because the
 harness refused nested review/documenter agents. This is not an independent audit.

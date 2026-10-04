@@ -33,43 +33,48 @@ async function signIn(page, user) {
   await expect(page.getByRole('heading', { name: 'Your training', exact: true })).toBeVisible();
 }
 async function start(page) {
-  await page.getByRole('link', { name: 'Choose a workout' }).click();
   await page.getByRole('button', { name: 'Start Upper body' }).click();
   await expect(page.getByRole('heading', { name: 'Upper body', exact: true, level: 1 })).toBeVisible();
   return page.url().split('/workouts/')[1].split('?')[0];
 }
 const set = (page, name = 'Bench press', number = 1) => page.getByRole('region', { name: `${name} set ${number}`, exact: true });
 
-test('login, select, switch around equipment, save, reload and finish against Supabase', async ({ page }) => {
+test('scroll all prescribed sets, edit defaults, save, reload and finish against Supabase', async ({ page }) => {
   const user = await account();
   await signIn(page, user);
   const id = await start(page);
+  await expect(set(page).getByLabel('Reps', { exact: true })).toHaveValue('8');
+  await expect(set(page, 'Bench press', 2)).toBeVisible();
+  await expect(set(page, 'Cable curl', 2)).toBeVisible();
+  await expect(page.getByRole('combobox', { name: 'Exercise or superset', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Sign out', exact: true })).toHaveCount(0);
+  expect(await page.getByRole('region', { name: / set \d+$/ }).evaluateAll(nodes => nodes.map(node => node.getAttribute('aria-label')))).toEqual([
+    'Bench press set 1', 'Bent-over row set 1', 'Bench press set 2', 'Bent-over row set 2', 'Cable curl set 1', 'Cable curl set 2',
+  ]);
   await set(page).getByLabel('Load (kg)', { exact: true }).fill('45');
   await set(page).getByLabel('Reps', { exact: true }).fill('9');
   await set(page).getByRole('button', { name: 'Record set 1' }).click();
   await expect(page.getByText('Saved to your account', { exact: true })).toBeVisible();
-  await page.getByRole('combobox', { name: 'Exercise or superset', exact: true }).click();
-  await page.getByRole('option', { name: 'Cable curl (0/2)', exact: true }).click();
+  await page.getByRole('link', { name: 'Cable curl', exact: true }).click();
   await set(page, 'Cable curl').getByLabel('Reps', { exact: true }).fill('10');
   await set(page, 'Cable curl').getByRole('button', { name: 'Record set 1' }).click();
   await expect(page.getByText('Saved to your account', { exact: true })).toBeVisible();
   await page.reload();
   await expect(set(page, 'Cable curl').getByLabel('Reps', { exact: true })).toHaveValue('10');
-  await page.getByRole('combobox', { name: 'Exercise or superset', exact: true }).click();
-  await page.getByRole('option', { name: 'Superset: Bench press + Bent-over row (1/4)', exact: true }).click();
   await expect(set(page).getByLabel('Reps', { exact: true })).toHaveValue('9');
   await expect(set(page).getByLabel('Load (kg)', { exact: true })).toHaveValue('45');
   await page.getByRole('link', { name: 'Back to your training' }).click();
   await page.getByRole('link', { name: 'Resume workout' }).click();
   await expect(set(page).getByLabel('Reps', { exact: true })).toHaveValue('9');
-  await expect(page.getByText('Rest 90 seconds after the complete round.')).toHaveCount(1);
-  await expect(set(page, 'Bent-over row').getByLabel('Reps', { exact: true })).toHaveValue('');
-  await page.getByRole('button', { name: 'Next round' }).click();
-  await expect(set(page, 'Bench press', 2).getByLabel('Reps', { exact: true })).toHaveValue('');
+  await expect(page.getByText('Rest 90 seconds after the complete round.')).toHaveCount(2);
+  await expect(set(page, 'Bent-over row').getByLabel('Reps', { exact: true })).toHaveValue('8');
+  await set(page, 'Bench press', 2).getByLabel('Reps', { exact: true }).fill('');
   await page.reload();
   await expect(set(page, 'Bench press', 2).getByLabel('Reps', { exact: true })).toHaveValue('');
-  await page.getByRole('combobox', { name: 'Round', exact: true }).click();
-  await page.getByRole('option', { name: 'Round 1 · 1/2 recorded', exact: true }).click();
+  await set(page, 'Cable curl', 2).getByRole('button', { name: 'Record set 2' }).click();
+  await expect(page.getByText('Saved to your account', { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(set(page, 'Bench press', 2).getByLabel('Reps', { exact: true })).toHaveValue('');
   await expect(set(page).getByLabel('Reps', { exact: true })).toHaveValue('9');
   await page.getByRole('button', { name: 'Finish workout', exact: true }).click();
   await page.getByRole('button', { name: 'Keep training' }).click();
@@ -82,6 +87,8 @@ test('login, select, switch around equipment, save, reload and finish against Su
   const exercises = checked(await admin.from('workout_exercises').select('performed_name, logged_sets(*)').eq('workout_id', id));
   expect(exercises.find(e => e.performed_name === 'Bench press').logged_sets.find(s => s.position === 1)).toMatchObject({ load_kg: 45, reps: 9, completed: true, load_convention: 'unknown' });
   expect(exercises.find(e => e.performed_name === 'Bent-over row').logged_sets.find(s => s.position === 1)).toMatchObject({ load_kg: null, reps: null, completed: false });
+  expect(exercises.find(e => e.performed_name === 'Cable curl').logged_sets.find(s => s.position === 2)).toMatchObject({ reps: 8, completed: true });
+  expect(exercises.find(e => e.performed_name === 'Bench press').logged_sets.find(s => s.position === 2)).toMatchObject({ reps: null, completed: false });
   await page.reload();
   await expect(page.getByRole('button', { name: 'Finish workout', exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -134,9 +141,9 @@ test('bad credentials, empty programme and sign-out have recovery paths', async 
   await expect(page.getByRole('alert')).toContainText('Could not sign in');
   await page.getByLabel(/^Password/).fill(password);
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-  await page.getByRole('link', { name: 'Choose a workout' }).click();
   await expect(page.getByText('No programme shared yet')).toBeVisible();
-  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await page.getByRole('button', { name: 'Account', exact: true }).click();
+  await page.getByRole('menuitem', { name: 'Sign out', exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
   await page.goto('/workouts');
   await expect(page).toHaveURL(/\/login$/);

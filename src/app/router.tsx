@@ -1,5 +1,5 @@
-import { Anchor, AppShell, Button, Container, Group, Stack, Text, Title } from '@mantine/core'
-import { createRootRoute, createRoute, createRouter, Link, Outlet, redirect, useRouter } from '@tanstack/react-router'
+import { Anchor, AppShell, Button, Container, Group, Menu, Stack, Text, Title } from '@mantine/core'
+import { createRootRoute, createRoute, createRouter, Link, Outlet, redirect, useRouter, useRouterState } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { backend, configured, workoutOptions } from '../features/client/api'
@@ -9,26 +9,34 @@ import { ContentState } from '../components/workouts/status'
 import { queryClient } from './query'
 
 function Shell() {
+  const clientRoute = useRouterState({ select: state => state.matches.some(match => match.routeId === '/_client') })
   return <AppShell header={{ height: 64 }} padding="md">
-    <AppShell.Header><Container size="sm" h="100%"><Group h="100%" justify="space-between"><Anchor component={Link} to="/" fw={700} c="dark">Coach Copilot</Anchor><Text size="sm">Your training</Text></Group></Container></AppShell.Header>
-    <AppShell.Main id="main"><Container size="sm" py="lg"><Outlet /></Container></AppShell.Main>
+    <AppShell.Header><Container size="sm" h="100%"><Group h="100%" justify="space-between"><Anchor component={Link} to="/" fw={700} c="dark">Coach Copilot</Anchor>{clientRoute && <AccountMenu />}</Group></Container></AppShell.Header>
+    <AppShell.Main id="main"><Container size="sm" px={0} py="sm"><Outlet /></Container></AppShell.Main>
   </AppShell>
 }
-function ClientLayout() {
+function AccountMenu() {
   const router = useRouter()
   const logout = useMutation({
     mutationFn: async () => { const { error } = await backend().auth.signOut(); if (error) throw error },
     onSuccess: async () => { queryClient.clear(); await router.invalidate(); await router.navigate({ to: '/login' }) },
   })
+  return <Menu position="bottom-end" width={240} closeOnItemClick={false}>
+    <Menu.Target><Button variant="subtle" color="dark" loading={logout.isPending}>Account</Button></Menu.Target>
+    <Menu.Dropdown><Menu.Item onClick={() => logout.mutate()}>Sign out</Menu.Item>
+      {logout.isError && <Text size="sm" p="sm" role="alert">Could not sign out. Check your connection and try again.</Text>}
+    </Menu.Dropdown>
+  </Menu>
+}
+function ClientLayout() {
+  const router = useRouter()
   useEffect(() => {
     const { data: { subscription } } = backend().auth.onAuthStateChange(event => {
       if (event === 'SIGNED_OUT') window.setTimeout(() => { queryClient.clear(); void router.invalidate() }, 0)
     })
     return () => subscription.unsubscribe()
   }, [router])
-  return <Stack gap="xl"><Outlet /><Group justify="space-between" mt="xl"><Text size="sm">Coach Copilot</Text><Button variant="subtle" color="dark" onClick={() => logout.mutate()} loading={logout.isPending}>Sign out</Button></Group>
-    {logout.isError && <Text role="alert">Could not sign out. Check your connection and try again.</Text>}
-  </Stack>
+  return <Outlet />
 }
 const root = createRootRoute({
   component: Shell,

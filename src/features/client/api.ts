@@ -12,7 +12,7 @@ export type Workout = Row<'workouts'> & {
   workout_blocks: (Row<'workout_blocks'> & { workout_exercises: WorkoutExercise[] })[]
   workout_feedback: Row<'workout_feedback'> | null
 }
-export type Draft = { workout: Workout; revision: string; dirty: boolean; complete: boolean; selected: string | null; round?: number; notes: string }
+export type Draft = { workout: Workout; revision: string; dirty: boolean; complete: boolean; notes: string; editedSets?: string[] }
 const key = (user: string, id: string) => `coach-workout:v1:${user}:${id}`
 export function readDraft(user: string, id: string): Draft | null {
   const value = localStorage.getItem(key(user, id))
@@ -67,7 +67,7 @@ export const workoutOptions = (user: string, id: string) => queryOptions({
       if (local && !navigator.onLine) return local
       throw error
     }
-    return { workout: data, revision: crypto.randomUUID(), dirty: false, complete: false, selected: local?.selected ?? null, round: local?.round, notes: data.workout_feedback?.notes ?? '' }
+    return { workout: data, revision: crypto.randomUUID(), dirty: false, complete: false, notes: data.workout_feedback?.notes ?? '', editedSets: local?.editedSets }
   },
 })
 export async function saveDraft(draft: Draft) {
