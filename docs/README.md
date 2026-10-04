@@ -17,8 +17,9 @@ approved specification or a commitment to reproduce the current app.
 9. [Backend API](architecture/backend-api.md) — fresh schema, Auth, RLS, transactional commands and local verification.
 10. [Domain security](architecture/domain-security.md) — role/operation matrix, lifecycle rules and security test coverage.
 11. [Training blocks](architecture/training-blocks.md) — persisted supersets, round/rest semantics and historical snapshots.
-11. [Product context](../PRODUCT.md) — confirmed users, offline requirements and design constraints.
-12. [Archived mockup review](product/mockups-review-2026-10-04.md) — findings and follow-ups from the discarded Mantine exploration.
+12. [Product context](../PRODUCT.md) — confirmed users, offline requirements and design constraints.
+13. [Archived mockup review](product/mockups-review-2026-10-04.md) — findings and follow-ups from the discarded Mantine exploration.
+14. [Component library](architecture/component-library.md) — reusable Mantine components, Storybook, gallery and interaction checks.
 
 [Story template](product/story-template.md) · [Historical technical checkpoint](history/technical-checkpoint.md)
 

@@ -6,6 +6,12 @@
     "node": ">=24"
   },
   "scripts": {
+    "components:dev": "vite --config tooling/components.vite.config.ts --host 127.0.0.1",
+    "components:build": "vite build --config tooling/components.vite.config.ts",
+    "components:preview": "vite preview --config tooling/components.vite.config.ts --host 127.0.0.1",
+    "storybook": "storybook dev --config-dir tooling/storybook --port 6006 --no-open",
+    "storybook:build": "storybook build --config-dir tooling/storybook --output-dir .artifacts/storybook --disable-telemetry",
+    "test:components": "npm run components:build && playwright test --config tests/playwright.components.config.ts",
     "backend:start": "node tooling/supabase.mjs start -x realtime,storage-api,imgproxy,postgres-meta,studio,logflare,vector,supavisor",
     "backend:stop": "node tooling/supabase.mjs stop",
     "backend:status": "node tooling/supabase.mjs status",
@@ -29,6 +35,9 @@
     "check": "npm run typecheck && npm run build && playwright test --config tests/playwright.preview.config.ts"
   },
   "dependencies": {
+    "@mantine/core": "9.6.3",
+    "@mantine/form": "9.6.3",
+    "@mantine/hooks": "9.6.3",
     "@supabase/supabase-js": "2.117.2",
     "@tanstack/react-query": "^5.104.1",
     "@tanstack/react-router": "^1.170.41",
@@ -36,11 +45,15 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "@playwright/test": "^1.63.0",
+    "@storybook/addon-a11y": "10.6.1",
+    "@storybook/react-vite": "10.6.1",
     "@types/node": "^26.6.4",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
+    "storybook": "10.6.1",
     "supabase": "2.119.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.2"

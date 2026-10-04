@@ -30,6 +30,8 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium firefox webkit
       - run: npm run check
+      - run: npm run storybook:build
+      - run: npm run test:components
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -37,5 +39,7 @@ jobs:
           path: |
             .artifacts/playwright-report/
             .artifacts/test-results/
+            .artifacts/component-report/
+            .artifacts/component-results/
           include-hidden-files: true
           retention-days: 14

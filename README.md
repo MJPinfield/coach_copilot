@@ -32,6 +32,24 @@ restores fixtures and rearms errors. Draft fields survive failed saves; saved da
 survives reloads and navigation until the server restarts or the demo is reset.
 Browser profiles get isolated workspaces; tabs in the same profile share data.
 
+## Domain component library
+
+```sh
+npm run components:dev
+# http://127.0.0.1:5174/test-components.html
+npm run storybook
+# http://localhost:6006
+```
+
+Reusable Mantine components cover coach prescriptions, client set logging, supersets,
+programmes, accounts, guidance, feedback, conversations and adaptations. The gallery
+uses fictional training records and real catalogue guidance/media references; actions
+run in memory. See [component contracts and coverage](docs/architecture/component-library.md).
+
+`npm run test:components` builds the gallery and checks interactions, accessibility
+and mobile layout in Chromium, Firefox and WebKit. `npm run storybook:build` builds
+the isolated examples. Outputs are under `.artifacts/`.
+
 ## Verify in real browsers
 
 ```sh
