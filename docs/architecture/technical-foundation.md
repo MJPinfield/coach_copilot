@@ -21,6 +21,22 @@ relationship-check fix. See [backend integration](../../supabase/README.md).
 Historical frontend source remains in Git. The prior technical checkpoint
 and domain inventory describe that historical app, not the rebuilt prototype.
 
+## UI component decision · 2026-10-04
+
+Max confirmed **Mantine** as the component library for Coach Copilot after comparing
+it with Chakra UI Pro, Material UI and shadcn/ui. Its integrated inputs, forms,
+navigation, dialogs, dates and charts fit programme authoring and mobile workout
+logging with less assembly work.
+
+Use [Mantine](https://mantine.dev/) components and
+[Mantine UI](https://ui.mantine.dev/) layout examples for upcoming UI work. Begin
+with the default theme and focus on working flows, responsive layouts and usable
+touch targets; custom branding and theming are deferred. React, TypeScript, Vite,
+TanStack Router/Query and Supabase remain the foundation.
+
+This records the agreed direction; Mantine installation and conversion of the
+existing synthetic screens are part of the upcoming UI implementation.
+
 ## Small executable design slice
 
 Coach edits a fictional programme title and notes → saves over HTTP → client sees
