@@ -1,4 +1,4 @@
-import { Accordion, ActionIcon, Alert, Anchor, Badge, Button, Divider, Group, Modal, NumberInput, Popover, Progress, Select, Stack, Text, Textarea, TextInput, Title } from '@mantine/core'
+import { Accordion, ActionIcon, Alert, Anchor, Badge, Box, Button, Divider, Group, Modal, NumberInput, Paper, Popover, Progress, Select, Stack, Text, Textarea, TextInput, Title } from '@mantine/core'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Link, useLoaderData } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
@@ -34,9 +34,9 @@ function SetEntry({ value, exercise, locked, onChange }: {
   const number = (next: string | number, action: (value: number | null) => void) => {
     if (typeof next === 'number' || next === '') action(next === '' ? null : next)
   }
-  return <Stack gap={6} component="section" aria-label={`${exercise.performed_name} set ${value.position}`}>
+  return <Stack gap={6} p="xs" bg={value.completed ? 'green.0' : 'gray.0'} component="section" aria-label={`${exercise.performed_name} set ${value.position}`}>
     <Group justify="space-between" gap="xs">
-      <Text size="sm" fw={600}>Set {value.position}{value.completed ? ' · Recorded' : ''}</Text>
+      <Text size="sm" fw={600} c="dark.7">Set {value.position}{value.completed ? ' · Recorded' : ''}</Text>
       <Popover width={280} position="bottom-end" withArrow trapFocus>
         <Popover.Target><Button variant="subtle" c="blue.8" size="compact-sm">Set details</Button></Popover.Target>
         <Popover.Dropdown><Stack gap="sm">
@@ -52,7 +52,7 @@ function SetEntry({ value, exercise, locked, onChange }: {
       <NumberInput flex={1} miw={0} label={convention === 'bodyweight' ? 'External kg' : 'Load (kg)'} hideControls size="md" value={value.load_kg ?? ''} min={0} allowNegative={false} decimalScale={2} clampBehavior="strict" readOnly={locked || convention === 'bodyweight'} onChange={next => number(next, updateLoad)} />
       <NumberInput flex={1} miw={0} label="Reps" hideControls size="md" value={value.reps ?? ''} min={0} allowNegative={false} allowDecimal={false} clampBehavior="strict" readOnly={locked} onChange={next => number(next, reps => onChange({ ...value, reps }))} />
       <NumberInput flex={1} miw={0} label="RIR" hideControls size="md" value={value.rir ?? ''} min={0} max={10} allowNegative={false} decimalScale={1} clampBehavior="strict" readOnly={locked} onChange={next => number(next, rir => onChange({ ...value, rir }))} />
-      <ActionIcon size={44} color="blue.8" variant={value.completed ? 'filled' : 'default'} disabled={locked} aria-label={value.completed ? 'Undo set completion' : `Record set ${value.position}`} aria-pressed={value.completed} onClick={() => onChange({ ...value, completed: !value.completed })}>
+      <ActionIcon size={44} color="green.8" variant={value.completed ? 'filled' : 'default'} disabled={locked} aria-label={value.completed ? 'Undo set completion' : `Record set ${value.position}`} aria-pressed={value.completed} onClick={() => onChange({ ...value, completed: !value.completed })}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>
       </ActionIcon>
     </Group>
@@ -127,22 +127,30 @@ function WorkoutEditor({ initial }: { initial: Draft }) {
     <div role="status" aria-live="polite">
       <Group justify="space-between"><Text fw={600}>{completed} of {sets.length} sets recorded</Text><Badge variant="default">
         {storageError ? 'Device save unavailable' : save.isPending ? 'Saving…' : draft.dirty ? online ? 'Saved on this device' : 'Offline · saved on device' : 'Saved to your account'}
-      </Badge></Group><Progress mt="sm" value={sets.length ? completed / sets.length * 100 : 0} aria-label="Recorded sets" />
+      </Badge></Group><Progress color="green.8" mt="sm" value={sets.length ? completed / sets.length * 100 : 0} aria-label="Recorded sets" />
     </div>
     {storageError && <Alert color="red" title="Could not save on this device">Keep this page open until your entries save to your account. Device storage may be full or disabled.</Alert>}
     {save.isError && <Alert color="red" title="Your latest changes have not synced">{storageError ? 'Your entries are still on this page.' : 'Your entries are saved on this device.'} Check your connection and sign-in, then retry.<Button mt="sm" display="block" variant="default" onClick={() => save.mutate(current.current)}>Retry save</Button></Alert>}
     {!online && <Text size="sm">You can keep logging this downloaded workout. Changes sync when this page reconnects. Start new workouts while online.</Text>}
     {blocks.length > 0 ? <>
-      <Group gap="sm" component="nav" aria-label="Jump to exercise">{blocks.map(block => <Anchor key={block.id} href={`#block-${block.id}`} c="blue.8" size="sm">{block.kind === 'superset' ? `Superset ${block.label}` : block.workout_exercises[0]?.performed_name}</Anchor>)}</Group>
+      <Group gap="xs" component="nav" aria-label="Jump to exercise">{blocks.map(block => <Button component="a" key={block.id} href={`#block-${block.id}`} variant="light" color={block.kind === 'superset' ? 'violet' : 'blue'} c={block.kind === 'superset' ? 'violet.9' : 'blue.9'} size="xs">{block.kind === 'superset' ? `Superset ${block.label}` : block.workout_exercises[0]?.performed_name}</Button>)}</Group>
       {blocks.map(block => {
         const exercises = [...block.workout_exercises].sort((a, b) => a.position - b.position)
         const rounds = [...new Set(exercises.flatMap(e => e.logged_sets.map(s => s.position)))].sort((a, b) => a - b)
-        return <Stack key={block.id} component="section" id={`block-${block.id}`} gap="md" style={{ scrollMarginTop: 80 }} aria-label={block.kind === 'superset' ? `Superset ${block.label}` : exercises[0]?.performed_name}>
-          <div><Title order={2} size="h3">{block.kind === 'superset' ? `Superset ${block.label}` : exercises[0]?.performed_name}</Title>
-            {block.kind === 'superset' && <Text size="sm" mt={4}>{exercises.map((e, i) => `${block.label}${i + 1} ${e.performed_name}`).join(' → ')} → rest → repeat</Text>}
-          </div>
+        const colour = block.kind === 'superset' ? 'violet' : 'blue'
+        const blockSets = exercises.flatMap(e => e.logged_sets)
+        return <Paper withBorder radius="md" key={block.id} component="section" id={`block-${block.id}`} style={{ scrollMarginTop: 80, overflow: 'hidden' }} aria-label={block.kind === 'superset' ? `Superset ${block.label}` : exercises[0]?.performed_name}>
+          <Box p="md" bg={`${colour}.0`}>
+            <Group justify="space-between" gap="xs" mb="xs">
+              <Badge color={`${colour}.8`} radius="sm">{block.kind === 'superset' ? 'Superset · paired exercises' : 'Single exercise'}</Badge>
+              <Text size="sm" c={`${colour}.9`}>{blockSets.filter(s => s.completed).length}/{blockSets.length} recorded</Text>
+            </Group>
+            <Title order={2} size="h3" c={`${colour}.9`}>{block.kind === 'superset' ? `Superset ${block.label}` : exercises[0]?.performed_name}</Title>
+            {block.kind === 'superset' && <Text size="sm" c="violet.9" mt={4}>{exercises.map((e, i) => `${block.label}${i + 1} ${e.performed_name}`).join(' → ')} → rest → repeat</Text>}
+          </Box>
+          <Stack p={{ base: 'xs', sm: 'md' }} gap="lg">
           {rounds.map(round => <Stack key={round} gap="sm" component="section" aria-label={`${block.label} round ${round}`}>
-            {block.kind === 'superset' && <Text fw={600} size="sm">Round {round}</Text>}
+            {block.kind === 'superset' && <Divider label={`Round ${round}`} labelPosition="left" color="violet.2" styles={{ label: { color: 'var(--mantine-color-violet-9)', fontWeight: 600 } }} />}
             {exercises.map((exercise, index) => {
               const set = exercise.logged_sets.find(s => s.position === round)
               if (!set) return null
@@ -150,17 +158,17 @@ function WorkoutEditor({ initial }: { initial: Draft }) {
               const untouched = !locked && !set.completed && !draft.editedSets?.includes(`${exercise.id}:${set.position}`) && set.reps === null && set.load_kg === null && set.rir === null && set.load_convention === 'unknown' && set.load_reference === null
               const value = untouched ? { ...set, reps: target?.reps_min ?? target?.reps_max ?? null } : set
               return <Stack key={exercise.id} gap={4}>
-                {block.kind === 'superset' && <Text fw={600}>{block.label}{index + 1} · {exercise.performed_name}</Text>}
+                {block.kind === 'superset' && <Group gap="xs" px="xs" wrap="nowrap"><Badge color="violet.8" radius="sm" miw={36}>{block.label}{index + 1}</Badge><Text fw={600}>{exercise.performed_name}</Text></Group>}
                 <SetEntry value={value} exercise={exercise} locked={locked} onChange={next => changeSet(exercise.id, next)} />
                 {block.kind === 'single' && target?.rest_seconds != null && <Text size="sm">Rest {target.rest_seconds}s after this set.</Text>}
               </Stack>
             })}
-            {block.kind === 'superset' && <Text size="sm" fw={600}>{block.rest_after_round_seconds === null ? 'Rest after the complete round.' : `Rest ${block.rest_after_round_seconds} seconds after the complete round.`}</Text>}
-            <Divider />
+            {block.kind === 'superset' ? <Text size="sm" fw={600} c="violet.9" bg="violet.0" p="xs">{block.rest_after_round_seconds === null ? 'Rest after the complete round.' : `Rest ${block.rest_after_round_seconds} seconds after the complete round.`}</Text> : <Divider />}
           </Stack>)}
           {!rounds.length && <Text>No sets prescribed for this exercise.</Text>}
           <Accordion>{exercises.map(e => <Accordion.Item key={e.id} value={e.id}><Accordion.Control>How to: {e.performed_name}</Accordion.Control><Accordion.Panel><Guidance exercise={e} /></Accordion.Panel></Accordion.Item>)}</Accordion>
-        </Stack>
+          </Stack>
+        </Paper>
       })}
     </> : <Text>This workout contains no exercises.</Text>}
     <Textarea label="Notes for your coach (optional)" description={<Text span size="sm" c="dark.6">How did it go? Include anything your coach should know.</Text>} minRows={3} value={draft.notes} readOnly={locked} onChange={e => persist({ ...draft, notes: e.currentTarget.value, dirty: true, revision: crypto.randomUUID() })} />

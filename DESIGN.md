@@ -58,6 +58,13 @@ filled actions use the built-in `blue.8` shade for contrast. Supporting descript
 use `dark.6`; do not rely on low-contrast default dimmed text for instructions.
 Status badges use the neutral `default` variant and communicate through words.
 
+Workout segmentation uses Mantine `blue.0`/`blue.9` for standalone exercise headers
+and `violet.0`/`violet.9` for superset headers, round separators and round-rest cues.
+Matching labelled jump links and A1/A2 markers reinforce the grouping. Recorded rows
+use `green.0` with dark text and a green completion check; progress uses `green.8`.
+Text labels and check states retain the meaning without colour. Flat bordered blocks
+separate exercises while every set remains visible in the scrolling log.
+
 ## Typography
 
 Use Mantine's system font stack. H1 is 34px/700 with a 1.3 line height; normal body
